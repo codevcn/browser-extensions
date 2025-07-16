@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Template Replacer</title>
+    <style>
+      body {
+        width: 400px;
+        padding: 10px;
+        font-family: Arial, sans-serif;
+      }
+      main,
+      div,
+      p,
+      textarea,
+      input,
+      button,
+      a,
+      section,
+      span {
+        box-sizing: border-box;
+      }
+      input,
+      textarea {
+        outline: none;
+        border: 1px solid gray;
+        border-radius: 5px;
+      }
+      input:focus,
+      textarea:focus {
+        outline: 2px #000 solid;
+      }
+      main {
+        width: 100%;
+      }
+      #template-pattern-input {
+        width: 100%;
+        margin-bottom: 10px;
+        padding: 5px;
+      }
+      #input-text-textarea {
+        width: 100%;
+        height: 150px;
+        margin-bottom: 10px;
+        padding: 5px;
+      }
+      #replace-text-input {
+        width: 100%;
+        margin-bottom: 10px;
+        padding: 5px;
+      }
+      #replace-button {
+        width: 100%;
+        padding: 8px;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        cursor: pointer;
+      }
+      #replace-button:hover {
+        background-color: #45a049;
+      }
+      #toaster {
+        position: fixed;
+        top: -100px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: white;
+        padding: 5px 10px;
+        border-radius: 5px;
+        width: fit-content;
+        animation: none;
+      }
+      #toaster.success {
+        background-color: #4caf50;
+        animation: toast 3.5s ease;
+      }
+      #toaster.error {
+        background-color: #f44336;
+        animation: toast 3.5s ease;
+      }
+      #toaster.warning {
+        background-color: #ff9800;
+        animation: toast 3.5s ease;
+      }
+      #toaster.paused {
+        animation-play-state: paused;
+      }
+      @keyframes toast {
+        0% {
+          top: -100px;
+        }
+        15% {
+          top: 10px;
+        }
+        80% {
+          top: 10px;
+        }
+        100% {
+          top: -100px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div id="toaster"></div>
+      <textarea id="input-text-textarea" placeholder="Paste your text here..."></textarea>
+      <input type="text" id="replace-text-input" placeholder="Enter replacement text..." />
+      <button id="replace-button">Replace</button>
+      <script src="popup.js" defer></script>
+    </main>
+  </body>
+</html>
