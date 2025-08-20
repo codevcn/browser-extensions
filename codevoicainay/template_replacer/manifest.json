@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Template Replacer",
-  "version": "2.0",
+  "version": "2.1",
   "description": "Replace text inside {{ }} with custom text and copy to clipboard",
   "permissions": ["clipboardWrite"],
   "action": {

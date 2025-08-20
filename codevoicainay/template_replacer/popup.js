@@ -34,8 +34,24 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var TemplateReplacer = /** @class */ (function () {
-    function TemplateReplacer() {
+var Toaster = /** @class */ (function () {
+    function Toaster() {
+        this.toaster = document.getElementById("toaster");
+    }
+    Toaster.prototype.show = function (message, type) {
+        var _this = this;
+        if (type === void 0) { type = "success"; }
+        this.toaster.textContent = message;
+        this.toaster.classList.remove("success", "error", "warning");
+        requestAnimationFrame(function () {
+            _this.toaster.classList.add(type);
+        });
+    };
+    return Toaster;
+}());
+var toaster = new Toaster();
+var App = /** @class */ (function () {
+    function App() {
         this.patterns = [];
         this.originalText = "";
         this.inputTextarea = document.getElementById("input-textarea");
@@ -44,7 +60,7 @@ var TemplateReplacer = /** @class */ (function () {
         this.copyButton = document.getElementById("copy-button");
         this.bindEvents();
     }
-    TemplateReplacer.prototype.bindEvents = function () {
+    App.prototype.bindEvents = function () {
         var _this = this;
         // Xử lý sự kiện input để phân tích pattern
         this.inputTextarea.addEventListener("input", function () {
@@ -55,7 +71,7 @@ var TemplateReplacer = /** @class */ (function () {
             _this.copyToClipboard();
         });
     };
-    TemplateReplacer.prototype.analyzePatterns = function () {
+    App.prototype.analyzePatterns = function () {
         var text = this.inputTextarea.value;
         this.originalText = text;
         // Tìm tất cả các pattern {{ text here... }}
@@ -65,18 +81,28 @@ var TemplateReplacer = /** @class */ (function () {
         while ((match = patternRegex.exec(text)) !== null) {
             matches.push(match);
         }
-        // Tạo danh sách pattern mới
-        this.patterns = matches.map(function (match, index) { return ({
-            fullMatch: match[0],
-            placeholder: match[1].trim(),
-            value: "",
-        }); });
+        // Tạo danh sách pattern duy nhất (không trùng lặp)
+        var uniquePatterns = new Map();
+        matches.forEach(function (match) {
+            var placeholder = match[1].trim();
+            if (!uniquePatterns.has(placeholder)) {
+                uniquePatterns.set(placeholder, match[0]);
+            }
+        });
+        this.patterns = Array.from(uniquePatterns.entries()).map(function (_a) {
+            var placeholder = _a[0], fullMatch = _a[1];
+            return ({
+                fullMatch: fullMatch,
+                placeholder: placeholder,
+                value: "",
+            });
+        });
         // Tạo các input cho pattern
         this.createPatternInputs();
         // Cập nhật output
         this.updateOutput();
     };
-    TemplateReplacer.prototype.createPatternInputs = function () {
+    App.prototype.createPatternInputs = function () {
         var _this = this;
         // Xóa tất cả input cũ
         this.patternsContainer.innerHTML = "";
@@ -117,17 +143,19 @@ var TemplateReplacer = /** @class */ (function () {
             _this.patternsContainer.appendChild(patternDiv);
         });
     };
-    TemplateReplacer.prototype.updateOutput = function () {
+    App.prototype.updateOutput = function () {
         var result = this.originalText;
-        // Thay thế từng pattern
+        // Thay thế tất cả các pattern giống nhau cùng lúc
         this.patterns.forEach(function (pattern) {
             if (pattern.value.trim()) {
-                result = result.replace(pattern.fullMatch, pattern.value);
+                // Sử dụng regex để thay thế tất cả các pattern giống nhau
+                var replaceRegex = new RegExp(pattern.fullMatch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
+                result = result.replace(replaceRegex, pattern.value);
             }
         });
         this.outputTextarea.value = result;
     };
-    TemplateReplacer.prototype.copyToClipboard = function () {
+    App.prototype.copyToClipboard = function () {
         return __awaiter(this, void 0, void 0, function () {
             var err_1;
             return __generator(this, function (_a) {
@@ -137,36 +165,23 @@ var TemplateReplacer = /** @class */ (function () {
                         return [4 /*yield*/, navigator.clipboard.writeText(this.outputTextarea.value)];
                     case 1:
                         _a.sent();
-                        this.showToast("Đã copy kết quả vào clipboard!", "success");
+                        toaster.show("Đã copy kết quả vào clipboard!", "success");
                         return [3 /*break*/, 3];
                     case 2:
                         err_1 = _a.sent();
                         // Fallback cho các trình duyệt cũ
                         this.outputTextarea.select();
                         document.execCommand("copy");
-                        this.showToast("Đã copy kết quả vào clipboard!", "success");
+                        toaster.show("Đã copy kết quả vào clipboard!", "success");
                         return [3 /*break*/, 3];
                     case 3: return [2 /*return*/];
                 }
             });
         });
     };
-    TemplateReplacer.prototype.showToast = function (message, type) {
-        if (type === void 0) { type = "success"; }
-        var toaster = document.getElementById("toaster");
-        if (toaster) {
-            toaster.textContent = message;
-            toaster.className = "toaster ".concat(type);
-            // Reset animation
-            toaster.style.animation = "none";
-            setTimeout(function () {
-                toaster.style.animation = "toast 3.5s ease";
-            }, 10);
-        }
-    };
-    return TemplateReplacer;
+    return App;
 }());
 // Khởi tạo ứng dụng khi DOM đã sẵn sàng
 document.addEventListener("DOMContentLoaded", function () {
-    new TemplateReplacer();
+    new App();
 });

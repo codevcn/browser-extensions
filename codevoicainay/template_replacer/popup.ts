@@ -62,10 +62,18 @@ class App {
       matches.push(match)
     }
 
-    // Tạo danh sách pattern mới
-    this.patterns = matches.map((match, index) => ({
-      fullMatch: match[0],
-      placeholder: match[1].trim(),
+    // Tạo danh sách pattern duy nhất (không trùng lặp)
+    const uniquePatterns = new Map<string, string>()
+    matches.forEach((match) => {
+      const placeholder = match[1].trim()
+      if (!uniquePatterns.has(placeholder)) {
+        uniquePatterns.set(placeholder, match[0])
+      }
+    })
+
+    this.patterns = Array.from(uniquePatterns.entries()).map(([placeholder, fullMatch]) => ({
+      fullMatch,
+      placeholder,
       value: "",
     }))
 
@@ -126,10 +134,12 @@ class App {
   private updateOutput(): void {
     let result = this.originalText
 
-    // Thay thế từng pattern
+    // Thay thế tất cả các pattern giống nhau cùng lúc
     this.patterns.forEach((pattern) => {
       if (pattern.value.trim()) {
-        result = result.replace(pattern.fullMatch, pattern.value)
+        // Sử dụng regex để thay thế tất cả các pattern giống nhau
+        const replaceRegex = new RegExp(pattern.fullMatch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g')
+        result = result.replace(replaceRegex, pattern.value)
       }
     })
 
