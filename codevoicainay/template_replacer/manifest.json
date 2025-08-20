@@ -2,10 +2,8 @@
   "manifest_version": 3,
   "name": "Template Replacer",
   "version": "1.0",
-  "description": "Replace text between { and } with custom text and copy to clipboard",
-  "permissions": [
-    "clipboardWrite"
-  ],
+  "description": "Replace text inside {{ }} with custom text and copy to clipboard",
+  "permissions": ["clipboardWrite"],
   "action": {
     "default_popup": "popup.html"
   },

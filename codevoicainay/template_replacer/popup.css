@@ -1,0 +1,171 @@
+body {
+  width: 400px;
+  margin: 0;
+  padding: 10px;
+  font-family: Arial, sans-serif;
+}
+
+main,
+div,
+p,
+textarea,
+input,
+button,
+a,
+section,
+span {
+  box-sizing: border-box;
+}
+
+input,
+textarea {
+  outline: none;
+  border: 1.5px solid gray;
+  border-radius: 5px;
+}
+
+input:focus,
+textarea:focus {
+  outline: 2px #000 solid;
+}
+
+main {
+  width: 100%;
+}
+
+#template-pattern-input {
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 5px;
+}
+
+.input-section,
+.patterns-section,
+.output-section {
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #333;
+}
+
+#input-textarea,
+#output-textarea {
+  width: 100%;
+  height: 120px;
+  padding: 8px;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.pattern-input {
+  display: flex;
+  margin-bottom: 10px;
+  gap: 10px;
+  align-items: center;
+}
+
+.pattern-input input {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.pattern-label {
+  min-width: 120px;
+  font-size: 12px;
+  color: #666;
+  background: #f5f5f5;
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+}
+
+.copy-btn {
+  width: 100%;
+  padding: 10px;
+  background-color: #2196f3;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.copy-btn:hover {
+  background-color: #1976d2;
+}
+
+.copy-btn:active {
+  background-color: #1565c0;
+}
+
+h2,
+h3 {
+  color: #333;
+  margin-bottom: 15px;
+}
+
+h2 {
+  text-align: center;
+  border-bottom: 2px solid #4caf50;
+  padding-bottom: 10px;
+}
+
+.toaster {
+  position: fixed;
+  top: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 5px;
+  width: fit-content;
+  animation: none;
+  font-size: 14px;
+  font-weight: 500;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.toaster.success {
+  background-color: #4caf50;
+  animation: toast 3.5s ease;
+}
+
+.toaster.error {
+  background-color: #f44336;
+  animation: toast 3.5s ease;
+}
+
+.toaster.warning {
+  background-color: #ff9800;
+  animation: toast 3.5s ease;
+}
+
+.toaster.paused {
+  animation-play-state: paused;
+}
+
+@keyframes toast {
+  0% {
+    top: -100px;
+  }
+
+  15% {
+    top: 10px;
+  }
+
+  80% {
+    top: 10px;
+  }
+
+  100% {
+    top: -100px;
+  }
+}
