@@ -59,7 +59,11 @@ var App = /** @class */ (function () {
         this.patternsContainer = document.getElementById("patterns-container");
         this.copyButton = document.getElementById("copy-button");
         this.bindEvents();
+        this.focusOnAppStarted();
     }
+    App.prototype.focusOnAppStarted = function () {
+        this.inputTextarea.focus();
+    };
     App.prototype.bindEvents = function () {
         var _this = this;
         // Xử lý sự kiện input để phân tích pattern
@@ -129,13 +133,9 @@ var App = /** @class */ (function () {
                 _this.updateOutput();
             });
             input.addEventListener("keydown", function (e) {
-                var _a, _b;
                 if (e.key === "Enter") {
-                    // Tự động focus vào input tiếp theo
-                    var nextInput = (_b = (_a = input.parentElement) === null || _a === void 0 ? void 0 : _a.nextElementSibling) === null || _b === void 0 ? void 0 : _b.querySelector("input");
-                    if (nextInput) {
-                        nextInput.focus();
-                    }
+                    _this.updateOutput();
+                    _this.copyToClipboard();
                 }
             });
             patternDiv.appendChild(label);
@@ -149,7 +149,7 @@ var App = /** @class */ (function () {
         this.patterns.forEach(function (pattern) {
             if (pattern.value.trim()) {
                 // Sử dụng regex để thay thế tất cả các pattern giống nhau
-                var replaceRegex = new RegExp(pattern.fullMatch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
+                var replaceRegex = new RegExp(pattern.fullMatch.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g");
                 result = result.replace(replaceRegex, pattern.value);
             }
         });
@@ -157,24 +157,36 @@ var App = /** @class */ (function () {
     };
     App.prototype.copyToClipboard = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var err_1;
+            var finalOutput, err_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        _a.trys.push([0, 2, , 3]);
-                        return [4 /*yield*/, navigator.clipboard.writeText(this.outputTextarea.value)];
+                        finalOutput = this.outputTextarea.value;
+                        if (!finalOutput) {
+                            toaster.show("Không có kết quả để copy!", "warning");
+                            return [2 /*return*/];
+                        }
+                        _a.label = 1;
                     case 1:
+                        _a.trys.push([1, 3, , 4]);
+                        return [4 /*yield*/, navigator.clipboard.writeText(finalOutput)];
+                    case 2:
                         _a.sent();
                         toaster.show("Đã copy kết quả vào clipboard!", "success");
-                        return [3 /*break*/, 3];
-                    case 2:
+                        return [3 /*break*/, 4];
+                    case 3:
                         err_1 = _a.sent();
                         // Fallback cho các trình duyệt cũ
                         this.outputTextarea.select();
-                        document.execCommand("copy");
+                        try {
+                            document.execCommand("copy");
+                        }
+                        catch (error) {
+                            toaster.show("Lỗi không copy được vào clipboard!", "error");
+                        }
                         toaster.show("Đã copy kết quả vào clipboard!", "success");
-                        return [3 /*break*/, 3];
-                    case 3: return [2 /*return*/];
+                        return [3 /*break*/, 4];
+                    case 4: return [2 /*return*/];
                 }
             });
         });

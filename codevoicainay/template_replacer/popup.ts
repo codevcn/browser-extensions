@@ -36,6 +36,11 @@ class App {
     this.copyButton = document.getElementById("copy-button") as HTMLButtonElement
 
     this.bindEvents()
+    this.focusOnAppStarted()
+  }
+
+  private focusOnAppStarted(): void {
+    this.inputTextarea.focus()
   }
 
   private bindEvents(): void {
@@ -117,11 +122,8 @@ class App {
 
       input.addEventListener("keydown", (e) => {
         if (e.key === "Enter") {
-          // Tự động focus vào input tiếp theo
-          const nextInput = input.parentElement?.nextElementSibling?.querySelector("input")
-          if (nextInput) {
-            nextInput.focus()
-          }
+          this.updateOutput()
+          this.copyToClipboard()
         }
       })
 
@@ -138,7 +140,10 @@ class App {
     this.patterns.forEach((pattern) => {
       if (pattern.value.trim()) {
         // Sử dụng regex để thay thế tất cả các pattern giống nhau
-        const replaceRegex = new RegExp(pattern.fullMatch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g')
+        const replaceRegex = new RegExp(
+          pattern.fullMatch.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+          "g"
+        )
         result = result.replace(replaceRegex, pattern.value)
       }
     })
@@ -147,13 +152,22 @@ class App {
   }
 
   private async copyToClipboard(): Promise<void> {
+    const finalOutput = this.outputTextarea.value
+    if (!finalOutput) {
+      toaster.show("Không có kết quả để copy!", "warning")
+      return
+    }
     try {
-      await navigator.clipboard.writeText(this.outputTextarea.value)
+      await navigator.clipboard.writeText(finalOutput)
       toaster.show("Đã copy kết quả vào clipboard!", "success")
     } catch (err) {
       // Fallback cho các trình duyệt cũ
       this.outputTextarea.select()
-      document.execCommand("copy")
+      try {
+        document.execCommand("copy")
+      } catch (error) {
+        toaster.show("Lỗi không copy được vào clipboard!", "error")
+      }
       toaster.show("Đã copy kết quả vào clipboard!", "success")
     }
   }

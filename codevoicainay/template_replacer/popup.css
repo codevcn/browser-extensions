@@ -1,3 +1,7 @@
+:root {
+  --vcn-primary-cl: #2196f3;
+}
+
 body {
   width: 400px;
   margin: 0;
@@ -93,7 +97,7 @@ label {
 .copy-btn {
   width: 100%;
   padding: 10px;
-  background-color: #2196f3;
+  background-color: var(--vcn-primary-cl);
   color: white;
   border: none;
   border-radius: 4px;
@@ -118,11 +122,11 @@ h3 {
 
 h2 {
   text-align: center;
-  border-bottom: 2px solid #4caf50;
+  border-bottom: 2px solid var(--vcn-primary-cl);
   padding-bottom: 10px;
 }
 
-.toaster {
+#toaster {
   position: fixed;
   top: -100px;
   left: 50%;
@@ -138,22 +142,22 @@ h2 {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.toaster.success {
+#toaster.success {
   background-color: #4caf50;
   animation: toast 3.5s ease;
 }
 
-.toaster.error {
+#toaster.error {
   background-color: #f44336;
   animation: toast 3.5s ease;
 }
 
-.toaster.warning {
+#toaster.warning {
   background-color: #ff9800;
   animation: toast 3.5s ease;
 }
 
-.toaster.paused {
+#toaster.paused {
   animation-play-state: paused;
 }
 
