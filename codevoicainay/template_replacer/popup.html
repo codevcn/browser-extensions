@@ -1,42 +1,56 @@
 <!DOCTYPE html>
 <html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Template Replacer</title>
+    <meta name="description" content="Extension để thay thế pattern trong văn bản" />
+    <link rel="stylesheet" href="popup.css" />
+  </head>
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>Template Replacer</title>
-  <meta name="description" content="Extension để thay thế pattern trong văn bản">
-  <link rel="stylesheet" href="popup.css">
-</head>
+  <body>
+    <main>
+      <div id="toaster"></div>
 
-<body>
-  <main>
-    <div id="toaster"></div>
-
-    <h2 id="app-title">Template Replacer</h2>
-
-    <div class="input-section">
-      <label for="input-textarea">Nhập văn bản đầu vào:</label>
-      <textarea id="input-textarea" placeholder="Nhập văn bản có chứa pattern {{ text here... }}"></textarea>
-    </div>
-
-    <div class="patterns-section">
-      <h3>Các pattern tìm thấy:</h3>
-      <div id="patterns-container">
-        <!-- Các input cho pattern sẽ được tạo động ở đây -->
+      <div class="text-placeholder-box">
+        <textarea
+          class="text-placeholder"
+          placeholder="Nhập văn bản để lưu lại"
+          name="text-placeholder"
+          rows="2"
+        ></textarea>
       </div>
-    </div>
 
-    <div class="output-section">
-      <label for="output-textarea">Kết quả:</label>
-      <textarea id="output-textarea" placeholder="Kết quả sau khi thay thế pattern" readonly></textarea>
-    </div>
+      <h2 id="app-title">Template Replacer</h2>
 
-    <button id="copy-button" class="copy-btn">Copy kết quả</button>
-  </main>
+      <div class="input-section">
+        <label for="input-textarea">Nhập văn bản đầu vào:</label>
+        <textarea
+          id="input-textarea"
+          placeholder="Nhập văn bản có chứa pattern {{ text here... }}"
+        ></textarea>
+      </div>
 
-  <script src="popup.js"></script>
-</body>
+      <div class="patterns-section">
+        <h3>Các pattern tìm thấy:</h3>
+        <div id="patterns-container">
+          <!-- Các input cho pattern sẽ được tạo động ở đây -->
+        </div>
+      </div>
 
+      <div class="output-section">
+        <label for="output-textarea">Kết quả:</label>
+        <textarea
+          id="output-textarea"
+          placeholder="Kết quả sau khi thay thế pattern"
+          readonly
+        ></textarea>
+      </div>
+
+      <button id="copy-button" class="copy-btn">Copy kết quả</button>
+    </main>
+
+    <script src="popup.js"></script>
+  </body>
 </html>

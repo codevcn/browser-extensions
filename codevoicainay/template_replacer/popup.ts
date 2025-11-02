@@ -26,17 +26,39 @@ class App {
   private outputTextarea: HTMLTextAreaElement
   private patternsContainer: HTMLDivElement
   private copyButton: HTMLButtonElement
+  private textPlaceholderTextarea: HTMLTextAreaElement
   private patterns: Pattern[] = []
   private originalText: string = ""
+  private readonly TEXT_PLACEHOLDER_STR_KEY = "text-placeholder"
+  private timeoutFlag: number | undefined = undefined
 
   constructor() {
     this.inputTextarea = document.getElementById("input-textarea") as HTMLTextAreaElement
     this.outputTextarea = document.getElementById("output-textarea") as HTMLTextAreaElement
     this.patternsContainer = document.getElementById("patterns-container") as HTMLDivElement
     this.copyButton = document.getElementById("copy-button") as HTMLButtonElement
+    this.textPlaceholderTextarea = document.querySelector(
+      ".text-placeholder"
+    ) as HTMLTextAreaElement
 
     this.bindEvents()
     this.focusOnAppStarted()
+    this.fillTextPlaceholder()
+  }
+
+  private fillTextPlaceholder(): void {
+    chrome.storage.local.get([this.TEXT_PLACEHOLDER_STR_KEY], (result) => {
+      console.log(">>> fillTextPlaceholder:", result)
+      this.textPlaceholderTextarea.value = result[this.TEXT_PLACEHOLDER_STR_KEY] || ""
+    })
+  }
+
+  private onEditTextPlaceholder(): void {
+    clearTimeout(this.timeoutFlag)
+    this.timeoutFlag = setTimeout(() => {
+      const text = this.textPlaceholderTextarea.value
+      chrome.storage.local.set({ [this.TEXT_PLACEHOLDER_STR_KEY]: text }, () => {})
+    }, 300)
   }
 
   private focusOnAppStarted(): void {
@@ -52,6 +74,11 @@ class App {
     // Xử lý sự kiện copy
     this.copyButton.addEventListener("click", () => {
       this.copyToClipboard()
+    })
+
+    // Xử lý sự kiện nhập text placeholder
+    this.textPlaceholderTextarea.addEventListener("input", () => {
+      this.onEditTextPlaceholder()
     })
   }
 

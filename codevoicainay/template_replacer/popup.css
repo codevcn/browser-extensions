@@ -178,3 +178,12 @@ h2 {
     top: -100px;
   }
 }
+
+.text-placeholder-box {
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+.text-placeholder {
+  width: 100%;
+}

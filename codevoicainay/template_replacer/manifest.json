@@ -3,7 +3,7 @@
   "name": "Template Replacer",
   "version": "2.1",
   "description": "Replace text inside {{ }} with custom text and copy to clipboard",
-  "permissions": ["clipboardWrite"],
+  "permissions": ["clipboardWrite", "storage"],
   "action": {
     "default_popup": "popup.html"
   },
