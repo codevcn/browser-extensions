@@ -186,4 +186,5 @@ h2 {
 
 .text-placeholder {
   width: 100%;
+  resize: vertical;
 }
