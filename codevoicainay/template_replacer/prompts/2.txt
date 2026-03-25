@@ -1,0 +1,18 @@
+@@[1]<<<
+description:<< test prompt 1 >>
+value:<< đang ở khu vực 2 >>
+>>>
+
+@@[2]<<<
+description:<< test prompt 2 >>
+value:<<
+đang ở khu vực 2
+dòng mới khu vực 2
+>>
+>>>
+
+@@[3]<<<
+description:<< test prompt 3 >>
+value:<<
+đang ở khu vực 2 okla {{placeholder 1}}, {{placeholder 2}}!!!>>
+>>>

@@ -8,6 +8,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var EShortcuts;
+(function (EShortcuts) {
+    EShortcuts["OPEN_PROMPTS"] = "o";
+})(EShortcuts || (EShortcuts = {}));
 class Toaster {
     constructor() {
         this.toaster = document.getElementById("toaster");
@@ -23,6 +27,8 @@ class Toaster {
 const toaster = new Toaster();
 class App {
     constructor() {
+        this.loadedPrompts = [];
+        this.selectedPromptIndex = -1;
         this.patterns = [];
         this.originalText = "";
         this.TEXT_PLACEHOLDER_STR_KEY = "text-placeholder";
@@ -32,6 +38,10 @@ class App {
         this.patternsContainer = document.getElementById("patterns-container");
         this.copyButton = document.getElementById("copy-button");
         this.textPlaceholderTextarea = document.querySelector(".text-placeholder");
+        this.openPromptsBtn = document.getElementById("open-prompts-btn");
+        this.promptsModal = document.getElementById("prompts-modal");
+        this.closeBtn = document.querySelector(".close-btn");
+        this.promptsList = document.getElementById("prompts-list");
         this.bindEvents();
         this.focusOnAppStarted();
         this.fillTextPlaceholder();
@@ -64,6 +74,150 @@ class App {
         // Xử lý sự kiện nhập text placeholder
         this.textPlaceholderTextarea.addEventListener("input", () => {
             this.onEditTextPlaceholder();
+        });
+        // Xử lý sự kiện mở danh sách prompt
+        this.openPromptsBtn.addEventListener("click", () => {
+            this.promptsModal.classList.remove("hidden");
+            this.loadPrompts();
+        });
+        // Xử lý sự kiện đóng danh sách prompt
+        this.closeBtn.addEventListener("click", () => {
+            this.promptsModal.classList.add("hidden");
+        });
+        // Đóng modal khi click ra ngoài vùng content
+        this.promptsModal.addEventListener("click", (e) => {
+            if (e.target === this.promptsModal) {
+                this.promptsModal.classList.add("hidden");
+            }
+        });
+        // Xử lý phím tắt
+        document.addEventListener("keydown", (e) => {
+            // Alt + L để bật/tắt modal prompts
+            if (e.altKey && e.key.toLowerCase() === EShortcuts.OPEN_PROMPTS) {
+                e.preventDefault();
+                if (this.promptsModal.classList.contains("hidden")) {
+                    this.promptsModal.classList.remove("hidden");
+                    this.loadPrompts();
+                }
+                return;
+            }
+            // Xử lý điều hướng trong modal nếu modal đang mở
+            if (!this.promptsModal.classList.contains("hidden") && this.loadedPrompts.length > 0) {
+                if (e.key === "ArrowDown") {
+                    e.preventDefault();
+                    if (this.selectedPromptIndex === this.loadedPrompts.length - 1) {
+                        this.selectedPromptIndex = 0;
+                    }
+                    else {
+                        this.selectedPromptIndex++;
+                    }
+                    this.updatePromptSelection();
+                }
+                else if (e.key === "ArrowUp") {
+                    e.preventDefault();
+                    if (this.selectedPromptIndex <= 0) {
+                        this.selectedPromptIndex = this.loadedPrompts.length - 1;
+                    }
+                    else {
+                        this.selectedPromptIndex--;
+                    }
+                    this.updatePromptSelection();
+                }
+                else if (e.key === "Enter") {
+                    e.preventDefault();
+                    if (this.selectedPromptIndex >= 0 &&
+                        this.selectedPromptIndex < this.loadedPrompts.length) {
+                        this.selectPrompt(this.loadedPrompts[this.selectedPromptIndex]);
+                    }
+                }
+                else if (e.key === "Escape") {
+                    this.promptsModal.classList.add("hidden");
+                }
+            }
+        });
+    }
+    loadPrompts() {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (this.loadedPrompts.length > 0) {
+                this.renderPrompts();
+                return;
+            }
+            this.promptsList.innerHTML = '<div class="loading-text">Đang tải...</div>';
+            const prompts = [];
+            let index = 1;
+            while (true) {
+                try {
+                    const url = chrome.runtime.getURL(`prompts/${index}.txt`);
+                    const response = yield fetch(url);
+                    if (!response.ok)
+                        break;
+                    const text = yield response.text();
+                    const parsedPrompts = this.parsePromptsText(text);
+                    prompts.push(...parsedPrompts);
+                    index++;
+                }
+                catch (e) {
+                    // Chrome fetch throws TypeError: Failed to fetch if local file doesn't exist.
+                    // Cuối danh sách (ví dụ đến 3.txt không có), lỗi này ném ra là bình thường.
+                    break;
+                }
+            }
+            this.loadedPrompts = prompts;
+            this.renderPrompts();
+        });
+    }
+    parsePromptsText(text) {
+        const results = [];
+        const regex = /@@\[(.*?)\]<<<\s*description:\s*<<\s*(.*?)\s*>>\s*value:\s*<<([\s\S]*?)>>\s*>>>/g;
+        let match;
+        while ((match = regex.exec(text)) !== null) {
+            results.push({
+                id: match[1].trim(),
+                description: match[2].trim(),
+                value: match[3].trim(),
+            });
+        }
+        return results;
+    }
+    renderPrompts() {
+        this.promptsList.innerHTML = "";
+        if (this.loadedPrompts.length === 0) {
+            this.promptsList.innerHTML = '<div class="loading-text">Không tìm thấy prompt nào.</div>';
+            return;
+        }
+        this.loadedPrompts.forEach((p) => {
+            const item = document.createElement("div");
+            item.className = "prompt-item";
+            const desc = document.createElement("div");
+            desc.className = "prompt-desc";
+            desc.textContent = p.description;
+            const val = document.createElement("div");
+            val.className = "prompt-value";
+            val.textContent = p.value;
+            item.appendChild(desc);
+            item.appendChild(val);
+            item.addEventListener("click", () => {
+                this.selectPrompt(p);
+            });
+            this.promptsList.appendChild(item);
+        });
+        this.selectedPromptIndex = -1;
+    }
+    selectPrompt(p) {
+        this.inputTextarea.value = p.value;
+        this.promptsModal.classList.add("hidden");
+        this.analyzePatterns();
+    }
+    updatePromptSelection() {
+        const items = this.promptsList.querySelectorAll(".prompt-item");
+        items.forEach((item, index) => {
+            if (index === this.selectedPromptIndex) {
+                item.classList.add("selected");
+                item.scrollIntoView({ block: "nearest" });
+            }
+            else {
+                item.classList.remove("selected");
+            }
         });
     }
     analyzePatterns() {
@@ -99,7 +253,7 @@ class App {
         this.patternsContainer.innerHTML = "";
         if (this.patterns.length === 0) {
             this.patternsContainer.innerHTML =
-                '<p style="color: #666; font-style: italic;">Không tìm thấy pattern nào</p>';
+                '<p style="color: #666; font-style: italic; font-size: 12px">Không tìm thấy pattern nào</p>';
             return;
         }
         // Tạo input cho mỗi pattern
@@ -111,7 +265,7 @@ class App {
             label.textContent = pattern.placeholder;
             const input = document.createElement("input");
             input.type = "text";
-            input.placeholder = `Nhập giá trị cho: ${pattern.placeholder}`;
+            input.placeholder = `${pattern.placeholder}`;
             input.value = pattern.value;
             // Xử lý sự kiện input và enter
             input.addEventListener("input", (e) => {

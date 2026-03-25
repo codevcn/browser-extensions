@@ -24,12 +24,37 @@
 
       <h2 id="app-title">Template Replacer</h2>
 
+      <div class="shortcuts-info">
+        <strong>💡 Phím tắt tiện ích:</strong>
+        <ul>
+          <li><kbd>Alt</kbd> + <kbd>L</kbd>: Mở / Đóng danh sách Prompt</li>
+          <li><kbd>↑</kbd> <kbd>↓</kbd>: Di chuyển chọn Prompt</li>
+          <li><kbd>Enter</kbd>: Xác nhận chọn / <kbd>Esc</kbd>: Đóng</li>
+        </ul>
+      </div>
+
       <div class="input-section">
-        <label for="input-textarea">Nhập văn bản đầu vào:</label>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <label for="input-textarea" style="margin-bottom: 0;">Nhập văn bản đầu vào:</label>
+          <button id="open-prompts-btn" class="secondary-btn">Danh sách Prompt</button>
+        </div>
         <textarea
           id="input-textarea"
           placeholder="Nhập văn bản có chứa pattern {{ text here... }}"
         ></textarea>
+      </div>
+
+      <!-- Modal danh sách prompt -->
+      <div id="prompts-modal" class="modal hidden">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3>Danh sách Prompt</h3>
+            <span class="close-btn">&times;</span>
+          </div>
+          <div id="prompts-list" class="prompts-list">
+            <div class="loading-text">Đang tải...</div>
+          </div>
+        </div>
       </div>
 
       <div class="patterns-section">

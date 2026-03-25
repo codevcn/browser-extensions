@@ -64,7 +64,7 @@ label {
 #input-textarea,
 #output-textarea {
   width: 100%;
-  height: 120px;
+  height: 80px;
   padding: 8px;
   resize: vertical;
   font-family: inherit;
@@ -187,4 +187,136 @@ h2 {
 .text-placeholder {
   width: 100%;
   resize: vertical;
+}
+
+/* Custom Button */
+.secondary-btn {
+  background-color: #f1f1f1;
+  color: #333;
+  border: 1px solid #ccc;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+.secondary-btn:hover {
+  background-color: #e1e1e1;
+}
+
+/* Modal */
+.modal {
+  display: flex;
+  position: fixed;
+  z-index: 2000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  justify-content: center;
+  align-items: center;
+}
+.modal.hidden {
+  display: none;
+}
+.modal-content {
+  background-color: #fff;
+  width: 90%;
+  max-width: 350px;
+  max-height: 80%;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+.modal-header {
+  padding: 10px 15px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.modal-header h3 {
+  margin: 0;
+  font-size: 16px;
+}
+.close-btn {
+  cursor: pointer;
+  font-size: 26px;
+  font-weight: bold;
+  color: #888;
+}
+.close-btn:hover {
+  color: #333;
+}
+.prompts-list {
+  padding: 10px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 400px;
+}
+.prompt-item {
+  padding: 8px 10px;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: #fafafa;
+}
+.prompt-item:hover,
+.prompt-item.selected {
+  background-color: #f0f7ff;
+  border-color: var(--vcn-primary-cl);
+}
+.prompt-desc {
+  font-weight: bold;
+  font-size: 13px;
+  color: #333;
+  margin-bottom: 4px;
+}
+.prompt-value {
+  font-size: 12px;
+  color: #5f5f5f;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.loading-text {
+  text-align: center;
+  color: #888;
+  font-size: 13px;
+  padding: 10px;
+}
+
+.shortcuts-info {
+  background-color: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeeba;
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  font-size: 13px;
+}
+
+.shortcuts-info ul {
+  margin: 8px 0 0 0;
+  padding-left: 20px;
+}
+
+.shortcuts-info li {
+  margin-bottom: 4px;
+}
+
+kbd {
+  background-color: #f8f9fa;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.2);
+  color: #333;
+  display: inline-block;
+  font-size: 11px;
+  font-family: Consolas, monospace;
+  padding: 1px 5px;
+  font-weight: bold;
 }
