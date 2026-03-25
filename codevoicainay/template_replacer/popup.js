@@ -147,7 +147,7 @@ class App {
             let index = 1;
             while (true) {
                 try {
-                    const url = chrome.runtime.getURL(`prompts/${index}.txt`);
+                    const url = chrome.runtime.getURL(`prompts/prompt-${index}.txt`);
                     const response = yield fetch(url);
                     if (!response.ok)
                         break;

@@ -176,7 +176,7 @@ class App {
 
     while (true) {
       try {
-        const url = chrome.runtime.getURL(`prompts/${index}.txt`)
+        const url = chrome.runtime.getURL(`prompts/prompt-${index}.txt`)
         const response = await fetch(url)
         if (!response.ok) break
         const text = await response.text()
