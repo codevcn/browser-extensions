@@ -1,18 +1,61 @@
 @@[1]<<<
-description:<< test prompt 1 >>
-value:<< đang ở khu vực 2 >>
+description:<< Prompt viết lyrics >>
+value:<<
+Viết 1 lyrics:
+- lời {{Việt / Anh / Trung / ...}}.
+- sử dụng format chuẩn ở trên để nói về 1 cuộc tình girl love (ko nhắc thẳng chữ "bách hợp" hay "girl love" trong lyrics) với không khí và nội dung và dòng nhạc tương tự như bài "{{Tên bài hát gốc}}". Độ dài câu chữ của 1 hơi hát tương tự như bài "{{Tên bài hát gốc}}".
+- các xưng hô trong lyrics sẽ là "{{Cách xưng hô}}".
+- người hát sẽ xưng là "{{Xưng hô của người hát}}".
+Lưu ý ko dùng lại câu từ của bài hát gốc "{{Tên bài hát gốc}}" (tránh đạo nhạc).
+
+- Hướng dẫn viết lời bài hát cho Suno AI:
+
+1. Các câu hướng dẫn cách hát phải được đặt trong ngoặc vuông ([]) và được viết bằng tiếng Anh. Ví dụ:
+
+```txt
+...
+
+[Chorus]
+[Explosive energy - Modern Pop melody]
+[Driving drums and bright, shimmering synths]
+Gói trọn tia nắng, nếm vị ngọt ta vừa tìm thấy
+...
+```
+
+2. Kèm "Style of music" ở cuối lyrics
+
+3. TAG phải viết bằng tiếng Anh, in hoa, và được đặt trong ngoặc vuông ([]). Ví dụ:
+
+```txt
+...
+[VERSE 1]
+...
+[CHORUS]
+...
+[BRIDGE]
+...
+```
+>>
 >>>
 
 @@[2]<<<
-description:<< test prompt 2 >>
+description:<< Prompt viết prompt tiếng Anh yêu cầu AI tạo video >>
 value:<<
-đang ở khu vực 2
-dòng mới khu vực 2
+Viết 1 prompt tiếng Anh chuẩn để yêu cầu AI tạo video trực quan hóa khái niệm sau:
+>>
+>>>
+
+
+@@[3]<<<
+description:<< Prompt đọc file để nắm bối cảnh >>
+value:<<
+Đọc các file tôi gửi để nắm bối cảnh.
 >>
 >>>
 
 @@[3]<<<
-description:<< test prompt 3 >>
+description:<< Prompt tách trang phục ra khỏi người mẫu >>
 value:<<
-đang ở khu vực 2 okla {{placeholder 1}}, {{placeholder 2}}!!!>>
+Remove the model and isolate the clothing from the reference image. Reconstruct the garment as a standalone fashion product while preserving the exact design, shape, fabric texture, stitching, patterns, colors, and details. The clothing should appear naturally shaped as if worn by an invisible mannequin. Centered front view, symmetrical composition, solid light gray background, clean studio setup, soft studio lighting, high detail, professional fashion e-commerce product photography.
+>>
 >>>

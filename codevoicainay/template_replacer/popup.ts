@@ -245,6 +245,11 @@ class App {
     this.inputTextarea.value = p.value
     this.promptsModal.classList.add("hidden")
     this.analyzePatterns()
+    
+    // Nếu prompt không có pattern (biến) nào, tự động copy luôn
+    if (this.patterns.length === 0) {
+      this.copyToClipboard()
+    }
   }
 
   private updatePromptSelection(): void {

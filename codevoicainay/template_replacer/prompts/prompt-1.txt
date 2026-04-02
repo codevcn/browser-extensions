@@ -1,18 +1,20 @@
 @@[1]<<<
-description:<< test prompt 1 >>
-value:<< 1 promt nè hehe!!! >>
->>>
-
-@@[2]<<<
-description:<< test prompt 2 >>
+description:<< Prompt giới thiệu công nghệ >>
 value:<<
-2 promt nè hehe!!!
-xuống dòng mới{{có gì mới?}}
+Hãy giới thiệu về "{{tên công nghệ}}" đầy đủ chi tiết theo trình tự sau: 
+- Giới thiệu chung.
+- Các khái niệm chính.
+- Lý do ra đời, bối cảnh trước và sau khi có {{tên công nghệ}}.
+- Mục tiêu thiết kế & Triết lý đằng sau.
+- Các tính năng nổi bật.
+- Các trường hợp sử dụng phổ biến.
+- Cuối cùng, trình bày thực trạng hiện tại của việc sử dụng {{tên công nghệ}}.
 >>
 >>>
 
-@@[3]<<<
-description:<< test prompt 3 >>
+@@[2]<<<
+description:<< Prompt làm nét ảnh >>
 value:<<
-3 promt nè hehe!!!>>
+Transform this image into highly photorealistic quality as if captured by professional DSLR camera with prime lens. Apply natural lighting with accurate shadows and highlights. Add authentic real world details including natural skin texture with visible pores, organic surface imperfections, realistic fabric and material properties, proper depth of field with natural bokeh. Enhance with volumetric lighting, realistic color grading, sharp focus, and physical accuracy. Turn any blurry details into physical, meaningful details. Make the picture 10-20% brighter or more pop up. Output should appear indistinguishable from real professional photography with all elements following real world physics and natural appearance at maximum resolution.
+>>
 >>>
