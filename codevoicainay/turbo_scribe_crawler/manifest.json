@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "TurboScribe Transcription Copier",
+  "version": "1.0",
+  "description": "Tiện ích mở rộng nhằm lấy content chữ từ phiên âm trên TurboScribe.",
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "permissions": ["activeTab", "scripting", "clipboardWrite", "clipboardRead"],
+  "host_permissions": ["*://*.turboscribe.com/*"],
+  "icons": {
+    "48": "icon48.png",
+    "128": "icon128.png"
+  }
+}

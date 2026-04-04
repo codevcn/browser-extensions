@@ -56,6 +56,6 @@ value:<<
 @@[3]<<<
 description:<< Prompt tách trang phục ra khỏi người mẫu >>
 value:<<
-Remove the model and isolate the clothing from the reference image. Reconstruct the garment as a standalone fashion product while preserving the exact design, shape, fabric texture, stitching, patterns, colors, and details. The clothing should appear naturally shaped as if worn by an invisible mannequin. Centered front view, symmetrical composition, solid light gray background, clean studio setup, soft studio lighting, high detail, professional fashion e-commerce product photography.
+Remove the model and isolate the clothing from the reference image. Also remove any jewelry and accessories from the item and the image. Reconstruct the garment as a standalone fashion product while preserving the exact design, shape, fabric texture, stitching, patterns, colors, and details. The clothing should appear naturally shaped as if worn by an invisible mannequin. Centered front view, symmetrical composition, solid gray background, clean studio setup, soft studio lighting, high detail, professional fashion e-commerce product photography.
 >>
 >>>

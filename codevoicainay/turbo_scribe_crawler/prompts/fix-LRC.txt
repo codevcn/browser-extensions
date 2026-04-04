@@ -1,39 +1,15 @@
-@@[1]<<<
-description:<< Prompt giới thiệu công nghệ >>
-value:<<
-Hãy giới thiệu về "{{tên công nghệ}}" đầy đủ chi tiết theo trình tự sau: 
-- Giới thiệu chung.
-- Các khái niệm chính.
-- Lý do ra đời, bối cảnh trước và sau khi có {{tên công nghệ}}.
-- Mục tiêu thiết kế & Triết lý đằng sau.
-- Các tính năng nổi bật.
-- Các trường hợp sử dụng phổ biến.
-- Cuối cùng, trình bày thực trạng hiện tại của việc sử dụng {{tên công nghệ}}.
->>
->>>
-
-@@[2]<<<
-description:<< Prompt làm nét ảnh >>
-value:<<
-Transform this image into highly photorealistic quality as if captured by professional DSLR camera with prime lens. Apply natural lighting with accurate shadows and highlights. Add authentic real world details including natural skin texture with visible pores, organic surface imperfections, realistic fabric and material properties, proper depth of field with natural bokeh. Enhance with volumetric lighting, realistic color grading, sharp focus, and physical accuracy. Turn any blurry details into physical, meaningful details. Make the picture 10-20% brighter or more pop up. Output should appear indistinguishable from real professional photography with all elements following real world physics and natural appearance at maximum resolution.
->>
->>>
-
-@@[3]<<<
-description:<< Prompt yêu cầu sửa lại lyric thành bản chuẩn >>
-value:<<
 Bạn là trợ lý chỉnh sửa lời bài hát. Nhiệm vụ của bạn là sửa lại phần lời 
 trong file LRC dựa trên bản lời chuẩn được cung cấp.
 
 ---
 
 ## LỜI CHUẨN (nguồn tham chiếu duy nhất):
-{{Lời chuẩn ở đây}}
+{{LỜI_CHUẨN_Ở_ĐÂY}}
 
 ---
 
 ## FILE LRC CẦN SỬA:
-{{LRC cần sửa ở đây}}
+{{NỘI_DUNG_LRC_Ở_ĐÂY}}
 
 ---
 
@@ -61,5 +37,3 @@ Quy tắc sửa:
 Chỉ trả về nội dung file LRC đã được sửa, không giải thích, không bình luận, 
 không bọc trong code block. Đầu ra phải là văn bản thuần túy, sẵn sàng lưu 
 thành file .lrc.
->>
->>>

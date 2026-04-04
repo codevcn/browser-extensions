@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <title>TurboScribe Copier</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <h2>TurboScribe Copier</h2>
+
+    <div id="setup-container">
+      <div class="result-label" style="margin-top: 0">Nhập Lời Chuẩn:</div>
+      <textarea
+        id="standard-audio-area"
+        placeholder="Dán lời bài hát chuẩn vào đây..."
+        spellcheck="false"
+      ></textarea>
+      <button id="start-btn" class="retry-btn">✅ OK</button>
+    </div>
+
+    <div id="status-container">
+      <div id="step-domain" class="status-item">
+        <div class="icon" id="icon-domain">⚪</div>
+        <span id="text-domain">Đang kiểm tra tên miền...</span>
+      </div>
+
+      <div class="loading-container" id="loading-find">
+        <div class="loading-bar"></div>
+      </div>
+      <div id="step-find" class="status-item">
+        <div class="icon" id="icon-find">⚪</div>
+        <span id="text-find">Chờ tìm transcription...</span>
+      </div>
+
+      <div class="loading-container" id="loading-copy">
+        <div class="loading-bar"></div>
+      </div>
+      <div id="step-copy" class="status-item">
+        <div class="icon" id="icon-copy">⚪</div>
+        <span id="text-copy">Chờ sao chép...</span>
+      </div>
+
+      <div id="results-container">
+        <div class="result-label">Prompt đã sao chép:</div>
+        <textarea
+          id="lrc-area"
+          placeholder="Nhấn Enter để copy lại Prompt"
+          spellcheck="false"
+        ></textarea>
+      </div>
+
+      <button id="retry-btn" class="retry-btn">🔄 Làm lại</button>
+    </div>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
