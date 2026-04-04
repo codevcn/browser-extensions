@@ -1,38 +1,4 @@
 "use strict";
-const PROMPT_TEMPLATE = `Bạn là trợ lý chỉnh sửa lời bài hát. Nhiệm vụ của bạn là sửa lại phần lời trong file LRC dựa trên bản lời chuẩn được cung cấp.
-
----
-
-## LỜI CHUẨN (nguồn tham chiếu duy nhất):
-{{LỜI_CHUẨN_Ở_ĐÂY}}
-
----
-
-## FILE LRC CẦN SỬA:
-{{NỘI_DUNG_LRC_Ở_ĐÂY}}
-
----
-
-## NHIỆM VỤ:
-
-Mỗi dòng trong file LRC có định dạng: [mm:ss.xx] <lời bài hát>
-Bạn chỉ được sửa phần lời — tuyệt đối không chạm vào timestamp.
-
-Quy tắc sửa:
-1. Lấy bản lời chuẩn làm nguồn sự thật duy nhất cho từ ngữ đúng.
-2. Khớp từng dòng LRC với dòng có nghĩa gần nhất trong bản lời chuẩn.
-3. Thay thế phần lời sai bằng đúng nguyên văn từ bản lời chuẩn.
-4. Nếu dòng LRC đã đúng (khớp với bản chuẩn), giữ nguyên, không sửa.
-5. Nếu một từ hoặc cụm từ trong LRC bị sai (viết sai, nghe nhầm, thiếu từ, sai từ), thay toàn bộ phần lời của dòng đó bằng đúng nguyên văn từ bản chuẩn.
-6. Giữ nguyên các dòng metadata của LRC (các dòng như [ti:], [ar:], [by:], [offset:], v.v.) — không sửa gì cả.
-7. KHÔNG thêm, xóa, hay đảo thứ tự bất kỳ dòng nào — chỉ sửa phần lời tại chỗ.
-8. Sao chép nguyên xi dấu câu từ bản lời chuẩn, không tự ý thay đổi.
-
----
-
-## ĐỊNH DẠNG ĐẦU RA:
-
-Chỉ trả về nội dung file LRC đã được sửa, không giải thích, không bình luận, không bọc trong code block. Đầu ra phải là văn bản thuần túy, sẵn sàng lưu thành file .lrc.`;
 // Hàm này được inject vào page nên phải là một function độc lập,
 // không được để bên trong class vì Chrome executeScript không đọc được cú pháp method của class.
 function extractTranscriptFromPageFunc() {
@@ -248,8 +214,18 @@ class TurboScribeCopier {
             // Convert format
             const lrcResult = this.convertToLRC(extractionResult);
             // Inject to Prompt Template
+            let promptTemplate = "";
+            try {
+                const response = await fetch("prompts/fix-LRC.txt");
+                promptTemplate = await response.text();
+            }
+            catch (err) {
+                console.error("Không thể load prompt template:", err);
+                this.setStep("copy", "error", "Lỗi không thể tải template prompt");
+                return;
+            }
             const standardText = this.standardAudioArea.value.trim();
-            const promptResult = PROMPT_TEMPLATE.replace("{{LỜI_CHUẨN_Ở_ĐÂY}}", standardText).replace("{{NỘI_DUNG_LRC_Ở_ĐÂY}}", lrcResult);
+            const promptResult = promptTemplate.replace("{{LỜI_CHUẨN_Ở_ĐÂY}}", standardText).replace("{{NỘI_DUNG_LRC_Ở_ĐÂY}}", lrcResult);
             await this.copyToClipboard(promptResult);
         }
         catch (error) {
