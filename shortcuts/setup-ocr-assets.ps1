@@ -95,7 +95,7 @@ function Download-Asset {
   for ($attempt = 1; $attempt -le 3; $attempt++) {
     try {
       Write-Host "[GET] $Url"
-      Invoke-WebRequest -Uri $Url -OutFile $tempPath -UseBasicParsing -Headers @{ 'User-Agent' = 'ShortcutsExtension-OCR-Setup/3.0.1' }
+      Invoke-WebRequest -Uri $Url -OutFile $tempPath -UseBasicParsing -Headers @{ 'User-Agent' = 'ShortcutsExtension-OCR-Setup/3.0.4' }
 
       $downloaded = Get-Item $tempPath
       if ($downloaded.Length -lt $MinBytes) {
@@ -116,7 +116,7 @@ function Download-Asset {
 }
 
 Write-Host ''
-Write-Host 'Shortcuts Extension v3.0.1 - Local OCR asset setup'
+Write-Host 'Shortcuts Extension v3.0.4 - Local OCR asset setup'
 Write-Host "Tesseract.js: $TesseractVersion"
 Write-Host 'The downloaded runtime is stored locally in the extension folder.'
 Write-Host ''

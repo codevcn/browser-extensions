@@ -64,6 +64,7 @@ input:focus-visible {
 }
 
 .popup-shell {
+  position: relative;
   width: 100%;
   min-height: 360px;
   padding: 18px;
@@ -105,6 +106,12 @@ h1 {
 
 .view[hidden] {
   display: none;
+}
+
+
+/* Reserve scroll space for the Home message bar so the final action is never hidden behind it. */
+.popup-shell[data-current-view='home'] #homeView {
+  padding-bottom: var(--home-message-reserved-space, 68px);
 }
 
 .actions,
@@ -322,6 +329,17 @@ kbd {
 .prepared-files__list span {
   flex: 0 0 auto;
   color: var(--color-text-subtle);
+}
+
+/* On Home, keep status feedback pinned to the popup viewport while the action list scrolls. */
+.popup-shell[data-current-view='home'] .message-bar {
+  position: fixed;
+  z-index: 50;
+  right: 18px;
+  bottom: 8px;
+  left: 18px;
+  margin-top: 0;
+  box-shadow: 0 4px 14px rgb(9 30 66 / 16%);
 }
 
 .message-bar {

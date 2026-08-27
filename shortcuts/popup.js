@@ -41,6 +41,8 @@ const preparedFilesSize = document.getElementById('preparedFilesSize');
 const preparedFilesList = document.getElementById('preparedFilesList');
 const savePreparedFilesBtn = document.getElementById('savePreparedFilesBtn');
 
+const popupShell = document.querySelector('.popup-shell');
+const homeView = document.getElementById('homeView');
 const extensionVersion = document.getElementById('extensionVersion');
 const viewTitle = document.getElementById('viewTitle');
 const viewSubtitle = document.getElementById('viewSubtitle');
@@ -60,6 +62,7 @@ let isCopyingUrls = false;
 let isPreparingFiles = false;
 let isWritingFiles = false;
 let isStartingRegionScan = false;
+let messageBarResizeObserver = null;
 
 pageScreenshotBtn.addEventListener('click', handlePageScreenshot);
 copyUrlsViewBtn.addEventListener('click', () => openView('copy-urls'));
@@ -77,7 +80,32 @@ document.addEventListener('keydown', handleGlobalShortcut, true);
 
 setSaveScreenshotButtonEnabled(false);
 setExtensionVersion();
+initializeMessageBarLayout();
 setMessage('Ready.', 'info');
+
+function initializeMessageBarLayout() {
+  popupShell.dataset.currentView = currentView;
+
+  if (typeof ResizeObserver === 'function') {
+    messageBarResizeObserver = new ResizeObserver(() => {
+      updateHomeMessageReservedSpace();
+    });
+    messageBarResizeObserver.observe(messageBar);
+  }
+
+  updateHomeMessageReservedSpace();
+}
+
+function updateHomeMessageReservedSpace() {
+  if (currentView !== 'home') {
+    popupShell.style.removeProperty('--home-message-reserved-space');
+    return;
+  }
+
+  const messageHeight = Math.ceil(messageBar.getBoundingClientRect().height);
+  const reservedSpace = Math.max(68, messageHeight + 14);
+  popupShell.style.setProperty('--home-message-reserved-space', `${reservedSpace}px`);
+}
 
 function handleGlobalShortcut(event) {
   if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey) return;
@@ -124,6 +152,8 @@ function openView(viewName) {
   if (!config) return;
 
   currentView = viewName;
+  popupShell.dataset.currentView = viewName;
+  updateHomeMessageReservedSpace();
   viewTitle.textContent = config.title;
   viewSubtitle.textContent = config.subtitle;
 
@@ -876,6 +906,10 @@ function setMessage(message, state = 'info') {
   messageBar.setAttribute('role', config.role);
   messageIcon.textContent = config.icon;
   messageText.textContent = String(message || '');
+
+  if (currentView === 'home') {
+    requestAnimationFrame(updateHomeMessageReservedSpace);
+  }
 }
 
 function setStartingRegionScan(nextState) {

@@ -1,4 +1,4 @@
-# Shortcuts Extension v3.0.1
+# Shortcuts Extension v3.0.4
 
 A keyboard-first Chrome Manifest V3 extension for viewport screenshots, tab URL utilities, file downloads, and local OCR region scanning.
 
@@ -13,6 +13,12 @@ A keyboard-first Chrome Manifest V3 extension for viewport screenshots, tab URL 
 5. Choose **Load unpacked** and select this folder, or click **Reload** if it is already installed.
 
 The setup script pins the OCR versions and downloads them into `vendor/tesseract/`. At extension runtime, executable OCR code is loaded only from the extension package itself; screenshots are not sent to an OCR service.
+
+## Home status message behavior
+
+- The Home status/message bar is fixed to the bottom of the popup viewport, so it remains visible while the Home action list scrolls.
+- Home dynamically reserves bottom space based on the message bar's rendered height, preventing the final action from being covered by long messages.
+- Feature views keep the existing in-flow message behavior.
 
 ## Shortcuts
 
@@ -47,7 +53,11 @@ The setup script pins the OCR versions and downloads them into `vendor/tesseract
   - Captures the real visible browser pixels with `chrome.tabs.captureVisibleTab()`.
   - Crops the selected area using the screenshot/viewport scale ratio, which handles HiDPI and browser zoom more reliably than assuming `devicePixelRatio`.
   - Runs local OCR with Tesseract.js + WebAssembly in an offscreen extension document using the combined `eng+vie` language set.
-  - Displays recognized text in a selectable result panel.
+  - Starts with no floating status box or buttons; only the crosshair canvas is active until two points are selected.
+  - After the second point, shows the OCR status box plus `Reset` and `OK` controls.
+  - `Reset` clears the rectangle/result immediately so a new region can be selected from scratch.
+  - Displays recognized text in a selectable result panel with a Copy icon button.
+  - Copy button or `Ctrl + C` copies the entire recognized result; successful copy switches to a Check icon for 2 seconds.
   - `OK`, `Esc`, or `Ctrl + Q` closes the scanner.
 - `S` — **Save Screenshot**
   - Opens Save As for the latest screenshot captured in the current popup session.
@@ -78,6 +88,7 @@ Popup (9)
 ### OCR behavior and safeguards
 
 - OCR is pixel-based, so it works for normal DOM text, text inside images, canvas-rendered text, screenshots, and other visible rasterized content.
+- No floating status/control UI is shown before the two selection points are complete.
 - The selection overlay is hidden before capture so its border/status UI is not included in OCR input.
 - Very small selections are rejected to avoid accidental scans.
 - Small crops are upscaled before OCR to improve recognition of UI-sized text.
@@ -85,11 +96,18 @@ Popup (9)
 - The initialized worker is reused briefly for faster repeated scans, then terminated after 2 minutes of inactivity.
 - Scrolling is blocked while the selector is active so the chosen coordinates stay stable.
 - Re-injecting feature `9` while a scanner is already active does not create a duplicate instance.
+- Reset invalidates the current request on the page, preventing stale OCR results from replacing a newer selection.
+- OCR result copy uses the Clipboard API first and falls back to a temporary textarea + `execCommand('copy')` if needed.
 - Chrome internal pages cannot be scripted by this feature.
+
+## v3.0.3 fix
+
+- Fixed the Region OCR Copy button click handler so direct clicks reach the button before the result popover stops event bubbling.
+- `Ctrl+C` and direct Copy clicks now use the same copy function and the same 2-second checkmark feedback.
 
 ## Versioning
 
-- Extension release: **3.0.1**
+- Extension release: **3.0.4**
 - Chrome manifest format: **Manifest V3**
 - OCR engine: **Tesseract.js 7.0.0**
 
@@ -135,7 +153,7 @@ Responses with `text/html` or `application/xhtml+xml` are treated as normal web 
 - Feature `Ctrl + Q` is handled at page level while the scanner is active; browser/OS-reserved shortcuts can still take precedence on some systems. `Esc` is the reliable exit shortcut.
 - Prepared download-file data for feature 3 remains in popup memory until the popup closes or a new scan starts.
 
-## Project files added in v3.0.1
+## Project files added in v3.0.4
 
 ```text
 background.js                 MV3 service worker for capture/OCR routing

@@ -2,7 +2,7 @@
 setlocal
 cd /d "%~dp0"
 
-echo Shortcuts Extension v3.0.1 - OCR setup
+echo Shortcuts Extension v3.0.4 - OCR setup
 powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File "%~dp0setup-ocr-assets.ps1"
 set "EXITCODE=%ERRORLEVEL%"
 

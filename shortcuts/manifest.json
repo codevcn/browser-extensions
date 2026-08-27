@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Shortcuts Extension",
-  "version": "3.0.1",
+  "version": "3.0.4",
   "description": "Keyboard-first Chrome extension for screenshots, tab URL utilities, file downloads, and local OCR region scanning.",
   "minimum_chrome_version": "109",
   "permissions": [
