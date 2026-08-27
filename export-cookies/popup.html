@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Media Studio Cookie Exporter</title>
+    <link rel="stylesheet" href="popup.css">
+  </head>
+  <body>
+    <main class="panel">
+      <header class="header">
+        <h1>Cookie Exporter</h1>
+        <p>Export cookies.txt cho yt-dlp / mda.</p>
+      </header>
+
+      <section class="section">
+        <label class="label" for="preset">Preset</label>
+        <select id="preset">
+          <option value="douyin">Douyin</option>
+          <option value="bilibili">Bilibili</option>
+          <option value="current">Current tab domain</option>
+          <option value="custom">Custom domains</option>
+        </select>
+      </section>
+
+      <section class="section" id="customSection" hidden>
+        <label class="label" for="domains">Domains</label>
+        <textarea id="domains" spellcheck="false" placeholder="douyin.com&#10;iesdouyin.com"></textarea>
+      </section>
+
+      <section class="section">
+        <label class="label" for="filename">Filename</label>
+        <input id="filename" type="text" spellcheck="false">
+      </section>
+
+      <label class="check">
+        <input id="saveAs" type="checkbox" checked>
+        <span>Hỏi vị trí lưu file</span>
+      </label>
+
+      <div class="actions">
+        <button id="exportBtn" type="button">Export cookies.txt</button>
+      </div>
+
+      <p id="status" class="status" role="status"></p>
+    </main>
+    <script src="popup.js"></script>
+  </body>
+</html>

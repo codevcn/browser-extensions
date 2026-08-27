@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "Shortcuts Extension",
+  "version": "2.0.1",
+  "description": "Keyboard-first Chrome extension for viewport screenshots, copying tab URLs by domain, and saving file URLs from matching tabs.",
+  "permissions": [
+    "activeTab",
+    "clipboardWrite",
+    "downloads",
+    "tabs"
+  ],
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ],
+  "action": {
+    "default_title": "Shortcuts Extension",
+    "default_popup": "popup.html"
+  },
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Alt+0"
+      }
+    }
+  }
+}

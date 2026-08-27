@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "es6", // JS thế hệ mới, chạy tốt trên hầu hết trình duyệt
+    "module": "esnext", // Giữ nguyên import/export hiện đại
+    "outDir": "./", // Nơi xuất file JS sau khi biên dịch
+    "rootDir": "./", // Thư mục chứa mã nguồn TS
+    "strict": true, // Bật kiểm tra nghiêm ngặt để tránh lỗi
+    "esModuleInterop": true, // Cho phép import các thư viện commonjs dễ dàng
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true, // Bỏ qua check .d.ts để build nhanh hơn
+    "allowJs": true, // Cho phép xử lý cả file .js trong src (nếu có)
+    "moduleResolution": "node", // Chuẩn resolution phổ biến
+    "sourceMap": true, // Sinh file .map để debug dễ dàng trong browser
+    "lib": ["es6", "dom"] // Bao gồm thư viện ES6 và DOM
+  },
+  "include": ["./**/*.ts"], // Biên dịch tất cả file .ts
+  "exclude": ["node_modules"] // Bỏ qua node_modules
+}

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Template Replacer</title>
+    <meta name="description" content="Extension để thay thế pattern trong văn bản" />
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+
+  <body>
+    <main>
+      <div id="toaster"></div>
+
+      <div class="text-placeholder-box">
+        <textarea
+          class="text-placeholder"
+          placeholder="Nhập văn bản để lưu lại"
+          name="text-placeholder"
+          rows="2"
+        ></textarea>
+      </div>
+
+      <h2 id="app-title">Template Replacer</h2>
+
+      <div class="shortcuts-info">
+        <strong>💡 Phím tắt tiện ích:</strong>
+        <ul>
+          <li><kbd>Alt</kbd> + <kbd>L</kbd>: Mở / Đóng danh sách Prompt</li>
+          <li><kbd>↑</kbd> <kbd>↓</kbd>: Di chuyển chọn Prompt</li>
+          <li><kbd>Enter</kbd>: Xác nhận chọn / <kbd>Esc</kbd>: Đóng</li>
+        </ul>
+      </div>
+
+      <div class="input-section">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <label for="input-textarea" style="margin-bottom: 0;">Nhập văn bản đầu vào:</label>
+          <button id="open-prompts-btn" class="secondary-btn">Danh sách Prompt</button>
+        </div>
+        <textarea
+          id="input-textarea"
+          placeholder="Nhập văn bản có chứa pattern {{ text here... }}"
+        ></textarea>
+      </div>
+
+      <!-- Modal danh sách prompt -->
+      <div id="prompts-modal" class="modal hidden">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3>Danh sách Prompt</h3>
+            <span class="close-btn">&times;</span>
+          </div>
+          <div id="prompts-list" class="prompts-list">
+            <div class="loading-text">Đang tải...</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="patterns-section">
+        <h3>Các pattern tìm thấy:</h3>
+        <div id="patterns-container">
+          <!-- Các input cho pattern sẽ được tạo động ở đây -->
+        </div>
+      </div>
+
+      <div class="output-section">
+        <label for="output-textarea">Kết quả:</label>
+        <textarea
+          id="output-textarea"
+          placeholder="Kết quả sau khi thay thế pattern"
+          readonly
+        ></textarea>
+      </div>
+
+      <button id="copy-button" class="copy-btn">Copy kết quả</button>
+    </main>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

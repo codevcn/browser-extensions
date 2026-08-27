@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shortcuts Extension</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main class="popup-shell" aria-label="Shortcuts Extension popup">
+      <header class="popup-header">
+        <p class="eyebrow">Shortcuts</p>
+        <h1 id="viewTitle">Shortcuts Extension</h1>
+        <p id="viewSubtitle" class="subtitle">Run browser utilities with buttons or keyboard shortcuts.</p>
+      </header>
+
+      <section id="homeView" class="view" data-view="home" aria-labelledby="viewTitle">
+        <div class="actions" aria-label="Extension features">
+          <button id="pageScreenshotBtn" class="action-btn" type="button">
+            <span>
+              <strong>Page Screenshot</strong>
+              <small>Capture the visible viewport and copy it.</small>
+            </span>
+            <kbd>1</kbd>
+          </button>
+
+          <button id="copyUrlsViewBtn" class="action-btn" type="button">
+            <span>
+              <strong>Copy URLs by Domain</strong>
+              <small>Collect matching URLs from all open tabs.</small>
+            </span>
+            <kbd>2</kbd>
+          </button>
+
+          <button id="downloadFilesViewBtn" class="action-btn" type="button">
+            <span>
+              <strong>Download Files by Domain</strong>
+              <small>Fetch and save file URLs from matching tabs.</small>
+            </span>
+            <kbd>3</kbd>
+          </button>
+
+          <button id="saveScreenshotBtn" class="action-btn action-btn-secondary" type="button" disabled aria-disabled="true">
+            <span>
+              <strong>Save Screenshot</strong>
+              <small>Open Save As for the latest screenshot.</small>
+            </span>
+            <kbd>S</kbd>
+          </button>
+
+          <button id="closePopupBtn" class="action-btn action-btn-secondary" type="button">
+            <span>
+              <strong>Close</strong>
+              <small>Close the extension popup.</small>
+            </span>
+            <kbd>Q</kbd>
+          </button>
+        </div>
+      </section>
+
+      <section id="copyUrlsView" class="view" data-view="copy-urls" aria-labelledby="viewTitle" hidden>
+        <form id="copyUrlsForm" class="feature-form" novalidate>
+          <label class="field-label" for="copyDomainInput">Domain</label>
+          <input
+            id="copyDomainInput"
+            class="text-input"
+            name="domain"
+            type="text"
+            placeholder="example.com"
+            autocomplete="off"
+            spellcheck="false"
+            required
+          />
+          <p class="field-help">Matches the domain and its subdomains across all open HTTP/HTTPS tabs.</p>
+
+          <label class="checkbox-row" for="removeQueryCheckbox">
+            <input id="removeQueryCheckbox" type="checkbox" />
+            <span>Remove query string before copying</span>
+          </label>
+
+          <div class="form-actions">
+            <button id="copyUrlsSubmitBtn" class="submit-btn" type="submit">
+              <span>Copy matching URLs</span>
+              <kbd>Enter</kbd>
+            </button>
+
+            <button class="back-btn" type="button" data-back-home>
+              <span>Close</span>
+              <kbd>Q</kbd>
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <section id="downloadFilesView" class="view" data-view="download-files" aria-labelledby="viewTitle" hidden>
+        <form id="downloadFilesForm" class="feature-form" novalidate>
+          <label class="field-label" for="downloadDomainInput">Domain</label>
+          <input
+            id="downloadDomainInput"
+            class="text-input"
+            name="domain"
+            type="text"
+            placeholder="example.com"
+            autocomplete="off"
+            spellcheck="false"
+            required
+          />
+          <p class="field-help">The extension fetches every matching tab URL, keeps file responses, and skips normal HTML pages.</p>
+
+          <div class="form-actions">
+            <button id="downloadFilesSubmitBtn" class="submit-btn" type="submit">
+              <span>Scan matching tabs</span>
+              <kbd>Enter</kbd>
+            </button>
+
+            <button class="back-btn" type="button" data-back-home>
+              <span>Close</span>
+              <kbd>Q</kbd>
+            </button>
+          </div>
+        </form>
+
+        <section id="preparedFilesPanel" class="prepared-files" aria-label="Prepared files" hidden>
+          <div class="prepared-files__summary">
+            <strong id="preparedFilesCount">0 files ready</strong>
+            <span id="preparedFilesSize">0 B</span>
+          </div>
+          <ul id="preparedFilesList" class="prepared-files__list"></ul>
+          <button id="savePreparedFilesBtn" class="submit-btn" type="button">
+            <span>Choose folder &amp; save</span>
+            <kbd>Click</kbd>
+          </button>
+        </section>
+      </section>
+
+      <div id="messageBar" class="message-bar message-bar--info" data-state="info" role="status" aria-live="polite">
+        <span id="messageIcon" class="message-bar__icon" aria-hidden="true">i</span>
+        <span id="messageText" class="message-bar__text">Ready.</span>
+      </div>
+    </main>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "Media Studio Cookie Exporter",
+  "version": "1.0.0",
+  "description": "Export Douyin cookies to a Netscape cookies.txt file for yt-dlp / Media Studio.",
+  "permissions": [
+    "cookies",
+    "downloads",
+    "tabs"
+  ],
+  "host_permissions": [
+    "*://*.douyin.com/*",
+    "*://douyin.com/*",
+    "*://*.iesdouyin.com/*",
+    "*://iesdouyin.com/*",
+    "*://*.amemv.com/*",
+    "*://amemv.com/*",
+    "*://*.snssdk.com/*",
+    "*://snssdk.com/*",
+    "*://*.bilibili.com/*",
+    "*://bilibili.com/*"
+  ],
+  "action": {
+    "default_title": "Export cookies",
+    "default_popup": "popup.html"
+  }
+}

@@ -1,0 +1,119 @@
+@@[1]<<<
+description:<< Viết lyrics >>
+value:<<
+Viết 1 lyrics:
+- lời {{Việt / Anh / Trung / ...}}.
+- sử dụng format chuẩn ở trên để nói về 1 cuộc tình girl love (ko nhắc thẳng chữ "bách hợp" hay "girl love" trong lyrics) với không khí và nội dung và dòng nhạc tương tự như bài "{{Tên bài hát gốc}}". Độ dài câu chữ của 1 hơi hát tương tự như bài "{{Tên bài hát gốc}}".
+- các xưng hô trong lyrics sẽ là "{{Cách xưng hô}}".
+- người hát sẽ xưng là "{{Xưng hô của người hát}}".
+Lưu ý ko dùng lại câu từ của bài hát gốc "{{Tên bài hát gốc}}" (tránh đạo nhạc).
+
+- Hướng dẫn viết lời bài hát cho Suno AI:
+
+1. Các câu hướng dẫn cách hát phải được đặt trong ngoặc vuông ([]) và được viết bằng tiếng Anh. Ví dụ:
+
+```txt
+...
+
+[Chorus]
+[Explosive energy - Modern Pop melody]
+[Driving drums and bright, shimmering synths]
+Gói trọn tia nắng, nếm vị ngọt ta vừa tìm thấy
+...
+```
+
+2. Kèm "Style of music" ở cuối lyrics
+
+3. TAG phải viết bằng tiếng Anh, in hoa, và được đặt trong ngoặc vuông ([]). Ví dụ:
+
+```txt
+...
+[VERSE 1]
+...
+[CHORUS]
+...
+[BRIDGE]
+...
+```
+>>
+>>>
+
+@@[2]<<<
+description:<< Viết prompt yêu cầu AI tạo video trực quan hóa lý thuyết >>
+value:<<
+Viết 1 prompt tiếng Anh chuẩn để yêu cầu AI tạo video trực quan hóa khái niệm sau:
+>>
+>>>
+
+
+@@[3]<<<
+description:<< Đọc file để nắm bối cảnh >>
+value:<<
+Đọc các file tôi gửi để nắm bối cảnh.
+>>
+>>>
+
+@@[3]<<<
+description:<< Tách trang phục ra khỏi người mẫu >>
+value:<<
+Remove the model and isolate the clothing from the reference image. Also remove any jewelry and accessories from the item and the image. Reconstruct the garment as a standalone fashion product while preserving the exact design, shape, fabric texture, stitching, patterns, colors, and details. The clothing should appear naturally shaped as if worn by an invisible mannequin. Centered front view, symmetrical composition, solid gray background, clean studio setup, soft studio lighting, high detail, professional fashion e-commerce product photography.
+>>
+>>>
+
+@@[4]<<<
+description:<< Tạo ảnh người mẫu trong 1 cửa hàng thời trang >>
+value:<<
+Fashion photo inside a high-end, modern, minimalist fashion store, with a clean and luxurious space, very bright indoor lighting.
+Medium camera angle, at eye level / body level with the model, creating the feeling that the viewer is standing directly in front of the girl, with a natural perspective, not a low angle, not a high angle. Shot in 3/4 subject body to near full body, vertical composition, with the subject standing in the center of the frame.
+
+The model wears an outfit similar to the reference image and a pair of white ankle boots, standing straight with balanced weight, with a slight natural shift in the hips. One hand is placed on the hip, while the other hangs naturally along the body. Her face is relaxed, with a gentle closed-mouth smile, and her eyes are looking at the phone.
+
+The lighting is very bright and evenly spread throughout the entire room, making the subject stand out, with clear clothing details. The background is a high-end fashion store with softly blurred clothing racks behind her, clean, neat, and not visually cluttered.
+
+Super realistic style, high-end fashion photography, realistic skin texture, natural body proportions, eye-level perspective, clean composition, sharp focus on subject, soft background blur, premium indoor lighting.
+>>
+>>>
+
+@@[5]<<<
+description:<< Viết lại lời postcad sang tiếng Nhật >>
+value:<<
+Bạn là một nhà phát ngôn truyền cảm hứng người Nhật Bản, hãy viết lại đoạn văn sau sang tiếng Nhật, giữ đúng tinh thần và giá trị cốt lõi của cũng như nội dung của đoạn văn:
+{{đoạn văn cần viết lại}}
+>>
+>>>
+
+@@[6]<<<
+description:<< Diễn đạt câu sang tiếng Việt (truyền động lực) >>
+value:<<
+Bạn là 1 nhà văn nhiều năm kinh nghiệm trong dòng văn truyền cảm hứng và thông thạo nhiều thứ tiếng khác nhau, bạn hãy diễn đạt câu sau sang tiếng Việt (lập table diễn đạt theo từng dòng để tôi dễ đối chiếu):
+>>
+>>>
+
+@@[7]<<<
+description:<< Vẽ lại ảnh bằng nét hoạt hình >>
+value:<<
+Bạn là 1 họa sĩ với nhiều năm kinh nghiệm, hãy vẽ lại bức ảnh này bằng nét vẽ đã phân tích được, giữ nguyên bối cảnh, chi tiết các vật thể, ánh sáng không gian, giữ nguyên biểu cảm và tư thế của mọi người trong bức ảnh.
+>>
+>>>
+
+@@[8]<<<
+description:<< Tạo ảnh background cho video >>
+value:<<
+Tạo 1 ảnh bìa để làm background cho video từ bức ảnh này, ảnh bìa chỉ có các nhân vật với nét vẽ trong ảnh này, cho các nhân vật nhìn về phía ống kính camera và tạo dáng gì đó như khi đang chụp ảnh.
+Đặt tỷ lệ khung hình thành 16:9.
+>>
+>>>
+
+@@[9]<<<
+description:<< Đặt title tiếng Việt cho video >>
+value:<<
+Bạn là 1 nhà dịch thuật nhiều năm kinh nghiệm, tôi đang làm 1 video khác lấy cảm hứng từ video này nhưng có nội dung tương tự, bạn hãy dùng văn phong tiếng Việt để đề xuất các title tiếng Việt cho video tôi đang làm.
+>>
+>>>
+
+@@[10]<<<
+description:<< Redesign UI >>
+value:<<
+Đây là ảnh chụp phần {{ phần muốn redesign }}, UI đang bị sơ sài & thiếu sự chuyên nghiệp, bạn hãy redesign UI tập trung vào hướng {{ hướng redesign muốn làm }}.
+>>
+>>>
