@@ -23,6 +23,7 @@ const VIEW_CONFIG = Object.freeze({
 const pageScreenshotBtn = document.getElementById('pageScreenshotBtn');
 const copyUrlsViewBtn = document.getElementById('copyUrlsViewBtn');
 const downloadFilesViewBtn = document.getElementById('downloadFilesViewBtn');
+const scanRegionTextBtn = document.getElementById('scanRegionTextBtn');
 const saveScreenshotBtn = document.getElementById('saveScreenshotBtn');
 const closePopupBtn = document.getElementById('closePopupBtn');
 
@@ -40,6 +41,7 @@ const preparedFilesSize = document.getElementById('preparedFilesSize');
 const preparedFilesList = document.getElementById('preparedFilesList');
 const savePreparedFilesBtn = document.getElementById('savePreparedFilesBtn');
 
+const extensionVersion = document.getElementById('extensionVersion');
 const viewTitle = document.getElementById('viewTitle');
 const viewSubtitle = document.getElementById('viewSubtitle');
 const views = Array.from(document.querySelectorAll('[data-view]'));
@@ -57,10 +59,12 @@ let isSavingScreenshot = false;
 let isCopyingUrls = false;
 let isPreparingFiles = false;
 let isWritingFiles = false;
+let isStartingRegionScan = false;
 
 pageScreenshotBtn.addEventListener('click', handlePageScreenshot);
 copyUrlsViewBtn.addEventListener('click', () => openView('copy-urls'));
 downloadFilesViewBtn.addEventListener('click', () => openView('download-files'));
+scanRegionTextBtn.addEventListener('click', handleScanRegionToText);
 saveScreenshotBtn.addEventListener('click', handleSaveScreenshot);
 closePopupBtn.addEventListener('click', closePopup);
 
@@ -72,6 +76,7 @@ backHomeButtons.forEach((button) => button.addEventListener('click', openHomeVie
 document.addEventListener('keydown', handleGlobalShortcut, true);
 
 setSaveScreenshotButtonEnabled(false);
+setExtensionVersion();
 setMessage('Ready.', 'info');
 
 function handleGlobalShortcut(event) {
@@ -101,6 +106,7 @@ function handleGlobalShortcut(event) {
     '1': handlePageScreenshot,
     '2': () => openView('copy-urls'),
     '3': () => openView('download-files'),
+    '9': handleScanRegionToText,
     s: handleSaveScreenshot,
     q: closePopup
   };
@@ -140,6 +146,59 @@ function openView(viewName) {
 function openHomeView() {
   openView('home');
   setMessage('Ready.', 'info');
+}
+
+async function handleScanRegionToText() {
+  if (isStartingRegionScan) return;
+
+  setStartingRegionScan(true);
+  setMessage('Starting Scan Region To Text…', 'info');
+
+  try {
+    const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+
+    if (!Number.isInteger(activeTab?.id)) {
+      throw new Error('No active browser tab is available.');
+    }
+
+    if (!isScriptableTabUrl(activeTab.url)) {
+      throw new Error('Chrome cannot run Scan Region To Text on this page. Open a normal HTTP/HTTPS website and try again.');
+    }
+
+    await chrome.scripting.insertCSS({
+      target: { tabId: activeTab.id },
+      files: ['region-scan/region-scan.css']
+    });
+
+    const results = await chrome.scripting.executeScript({
+      target: { tabId: activeTab.id },
+      files: ['region-scan/region-scan.js']
+    });
+
+    const status = results?.[0]?.result?.status;
+    setMessage(status === 'already-active' ? 'Region scanner is already active on this tab.' : 'Region scanner started.', 'success');
+
+    window.setTimeout(closePopup, 80);
+  } catch (error) {
+    console.error('[Shortcuts Extension: Scan Region To Text]', error);
+    setMessage(getFriendlyError(error), 'error');
+  } finally {
+    setStartingRegionScan(false);
+  }
+}
+
+function isScriptableTabUrl(value) {
+  try {
+    const url = new URL(value);
+    return url.protocol === 'http:' || url.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
+function setExtensionVersion() {
+  const version = chrome.runtime.getManifest()?.version;
+  extensionVersion.textContent = version ? `· v${version}` : '';
 }
 
 async function handlePageScreenshot() {
@@ -819,6 +878,12 @@ function setMessage(message, state = 'info') {
   messageText.textContent = String(message || '');
 }
 
+function setStartingRegionScan(nextState) {
+  isStartingRegionScan = nextState;
+  scanRegionTextBtn.disabled = nextState;
+  scanRegionTextBtn.setAttribute('aria-disabled', String(nextState));
+}
+
 function setCapturing(nextState) {
   isCapturing = nextState;
   pageScreenshotBtn.disabled = nextState;
@@ -863,7 +928,12 @@ function closePopup() {
 function getFriendlyError(error) {
   const message = error?.message || String(error || 'Unknown error');
 
-  if (message.includes('Cannot access')) {
+  if (
+    message.includes('Cannot access') ||
+    message.includes('cannot be scripted') ||
+    message.includes('extensions gallery') ||
+    message.includes('Chrome cannot run Scan Region To Text')
+  ) {
     return 'Chrome cannot access this page. Try a normal HTTP/HTTPS website.';
   }
 

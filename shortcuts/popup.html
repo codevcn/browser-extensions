@@ -9,7 +9,7 @@
   <body>
     <main class="popup-shell" aria-label="Shortcuts Extension popup">
       <header class="popup-header">
-        <p class="eyebrow">Shortcuts</p>
+        <p class="eyebrow">Shortcuts <span id="extensionVersion" aria-label="Extension version"></span></p>
         <h1 id="viewTitle">Shortcuts Extension</h1>
         <p id="viewSubtitle" class="subtitle">Run browser utilities with buttons or keyboard shortcuts.</p>
       </header>
@@ -38,6 +38,14 @@
               <small>Fetch and save file URLs from matching tabs.</small>
             </span>
             <kbd>3</kbd>
+          </button>
+
+          <button id="scanRegionTextBtn" class="action-btn" type="button">
+            <span>
+              <strong>Scan Region To Text</strong>
+              <small>Select any visible region and recognize its text locally.</small>
+            </span>
+            <kbd>9</kbd>
           </button>
 
           <button id="saveScreenshotBtn" class="action-btn action-btn-secondary" type="button" disabled aria-disabled="true">

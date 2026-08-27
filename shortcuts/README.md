@@ -1,12 +1,24 @@
-# Shortcuts Extension
+# Shortcuts Extension v3.0.1
 
-A keyboard-first Manifest V3 Chrome extension for screenshots, tab URL collection, and file downloads by domain.
+A keyboard-first Chrome Manifest V3 extension for viewport screenshots, tab URL utilities, file downloads, and local OCR region scanning.
 
-## Features
+## One-time OCR setup
+
+`Scan Region To Text` uses Tesseract.js 7.0.0 and English + Vietnamese trained data locally. Before loading/reloading this source build:
+
+1. Run `setup-ocr-assets.cmd` on Windows.
+2. Wait for `[DONE] OCR assets are ready.`
+3. Open `chrome://extensions`.
+4. Enable **Developer mode**.
+5. Choose **Load unpacked** and select this folder, or click **Reload** if it is already installed.
+
+The setup script pins the OCR versions and downloads them into `vendor/tesseract/`. At extension runtime, executable OCR code is loaded only from the extension package itself; screenshots are not sent to an OCR service.
+
+## Shortcuts
 
 ### Global popup shortcut
 
-- `Alt + 0`: open the extension popup.
+- `Alt + 0` — open the extension popup.
 
 ### Home
 
@@ -17,51 +29,95 @@ A keyboard-first Manifest V3 Chrome extension for screenshots, tab URL collectio
   - Opens a form for a domain such as `example.com`.
   - Searches every open HTTP/HTTPS tab.
   - Matches the domain and its subdomains.
-  - Copies URLs using this format:
-    - `"https://domain.com/1","http://example.net?abc=123"`
   - Optional checkbox removes query strings while preserving URL fragments.
 - `3` — **Download Files by Domain**
   - Opens a form for a domain.
   - Copies matching full tab URLs to the clipboard.
-  - Fetches all matching URLs with a concurrency limit of four requests.
+  - Fetches matching URLs with a concurrency limit of four requests.
   - Detects file responses from headers, MIME types, and known extensions.
   - Skips normal HTML pages.
-  - Shows prepared filenames, categories, and sizes.
   - Lets the user choose one folder and writes all prepared files to it.
+- `9` — **Scan Region To Text**
+  - Opens a transparent full-viewport selection layer on the active website.
+  - First click sets one rectangle corner; second click sets the opposite corner.
+  - The rectangle is normalized, so clicking in the reverse direction still works.
+  - Uses a `3px solid` dark-purple border controlled by CSS variables:
+    - `--shortcuts-region-scan-border`
+    - `--shortcuts-region-scan-border-width`
+  - Captures the real visible browser pixels with `chrome.tabs.captureVisibleTab()`.
+  - Crops the selected area using the screenshot/viewport scale ratio, which handles HiDPI and browser zoom more reliably than assuming `devicePixelRatio`.
+  - Runs local OCR with Tesseract.js + WebAssembly in an offscreen extension document using the combined `eng+vie` language set.
+  - Displays recognized text in a selectable result panel.
+  - `OK`, `Esc`, or `Ctrl + Q` closes the scanner.
 - `S` — **Save Screenshot**
   - Opens Save As for the latest screenshot captured in the current popup session.
 - `Q` — **Close**
   - On Home: closes the popup.
   - Inside feature sections: returns to Home.
 
-### Form shortcuts
+### Form shortcut
 
-- `Enter`: submits the active feature form.
+- `Enter` — submit the active feature form.
 
-## Message bar
+## Scan Region To Text architecture
 
-The bottom message bar is managed only through `setMessage(message, state)`.
+```text
+Popup (9)
+  -> chrome.scripting injects the lightweight region selector
+  -> user selects a rectangle
+  -> selector hides itself for capture
+  -> service worker verifies the source tab is still active
+  -> chrome.tabs.captureVisibleTab()
+  -> service worker immediately tells selector capture is complete
+  -> selector becomes visible again with OCR progress
+  -> offscreen.html crops the screenshot at screenshot resolution
+  -> Tesseract.js Web Worker + WASM recognizes English and Vietnamese text locally
+  -> selectable text is returned to the page overlay
+```
 
-Supported states:
+### OCR behavior and safeguards
 
-- `success`
-- `error`
-- `warning`
-- `info`
+- OCR is pixel-based, so it works for normal DOM text, text inside images, canvas-rendered text, screenshots, and other visible rasterized content.
+- The selection overlay is hidden before capture so its border/status UI is not included in OCR input.
+- Very small selections are rejected to avoid accidental scans.
+- Small crops are upscaled before OCR to improve recognition of UI-sized text.
+- OCR requests are serialized through one worker to avoid concurrent-worker state issues.
+- The initialized worker is reused briefly for faster repeated scans, then terminated after 2 minutes of inactivity.
+- Scrolling is blocked while the selector is active so the chosen coordinates stay stable.
+- Re-injecting feature `9` while a scanner is already active does not create a duplicate instance.
+- Chrome internal pages cannot be scripted by this feature.
 
-The styling uses Atlassian-style semantic message colors and roles.
+## Versioning
+
+- Extension release: **3.0.1**
+- Chrome manifest format: **Manifest V3**
+- OCR engine: **Tesseract.js 7.0.0**
+
+The popup reads its displayed extension version directly from `manifest.json` using `chrome.runtime.getManifest()`, so the UI version does not need to be updated separately.
 
 ## Required permissions
 
-- `activeTab`: screenshot access for the active tab.
-- `clipboardWrite`: write images and text to the clipboard.
-- `downloads`: save the latest screenshot through Chrome Downloads.
-- `tabs`: read URLs and titles from all open tabs.
-- `host_permissions` for `http://*/*` and `https://*/*`: fetch matching tab URLs across domains.
+- `activeTab` — capture the active visible tab.
+- `clipboardWrite` — write images and text to the clipboard.
+- `downloads` — save the latest screenshot through Chrome Downloads.
+- `offscreen` — run local OCR in a hidden extension document with DOM/Worker support.
+- `scripting` — inject the region selector only when feature `9` is invoked.
+- `tabs` — read tab URLs/titles and route OCR progress to the source tab.
+- `host_permissions` for `http://*/*` and `https://*/*` — existing features 2 and 3 need access to matching open-tab URLs and remote file responses.
 
-Chrome will show broader permission warnings because features 2 and 3 need access to open-tab URLs and remote file responses.
+Minimum Chrome version is 109 because `chrome.offscreen` is used for OCR.
 
-## File detection
+## Content Security Policy
+
+Manifest V3 extension pages use:
+
+```text
+script-src 'self' 'wasm-unsafe-eval'; worker-src 'self'; object-src 'self';
+```
+
+This enables the bundled Tesseract WebAssembly runtime while keeping executable scripts and workers restricted to the extension package.
+
+## File detection for feature 3
 
 A response is treated as a file when one or more of these conditions apply:
 
@@ -71,36 +127,26 @@ A response is treated as a file when one or more of these conditions apply:
 
 Responses with `text/html` or `application/xhtml+xml` are treated as normal web pages unless served as attachments.
 
-## Download workflow
-
-Feature 3 intentionally uses two user actions:
-
-1. **Scan matching tabs** fetches and prepares the file data.
-2. **Choose folder & save** opens the system folder picker and writes the files.
-
-The second click is required because Chrome only permits the folder picker from a direct user activation.
-
-## Install for development
-
-1. Open Chrome.
-2. Go to `chrome://extensions`.
-3. Enable **Developer mode**.
-4. Click **Load unpacked**.
-5. Select this folder.
-
-After updating an existing installation, click **Reload** on the extension card so Chrome applies the new manifest permissions.
-
 ## Notes
 
-- The screenshot captures only the visible viewport, not the entire scrollable page.
-- Chrome internal pages such as `chrome://extensions` cannot be captured or fetched.
-- Protected URLs can still fail if the remote server rejects the request or requires a session that is unavailable to the extension request.
-- Prepared file data is held in popup memory until the popup closes or a new scan starts. Very large files can consume significant memory.
-- `background.js` remains unused and is not registered in the manifest.
+- Page Screenshot and Region OCR capture only the visible viewport, not the entire scrollable page.
+- OCR accuracy depends on the visible pixels. Very tiny, blurred, rotated, stylized, or low-contrast text can be less accurate.
+- This build bundles English and Vietnamese OCR data (`eng + vie`) after running the setup script.
+- Feature `Ctrl + Q` is handled at page level while the scanner is active; browser/OS-reserved shortcuts can still take precedence on some systems. `Esc` is the reliable exit shortcut.
+- Prepared download-file data for feature 3 remains in popup memory until the popup closes or a new scan starts.
 
+## Project files added in v3.0.1
 
-## 2.0.1 patch
+```text
+background.js                 MV3 service worker for capture/OCR routing
+region-scan/region-scan.js   selection UI and result interaction
+region-scan/region-scan.css  isolated scanner styling and purple border tokens
+offscreen.html               hidden OCR document
+offscreen.js                 crop, OCR queue, worker lifecycle
+setup-ocr-assets.cmd         Windows one-click OCR dependency setup
+setup-ocr-assets.ps1         pinned/retrying asset downloader
+vendor/tesseract/README.md   expected local OCR runtime layout
+THIRD_PARTY_NOTICES.md       third-party package notices
+```
 
-- Fixed the File System Access API picker ID by changing it to `shortcut-downloads` (under the 32-character limit).
-- Updated the primary interface palette to Atlassian-inspired white, black, and light-neutral gray tokens.
-- Semantic success, error, warning, and information message colors remain unchanged for accessibility and meaning.
+The obsolete `manifest.json.backup` from the previous release was removed to avoid stale version/configuration drift.
