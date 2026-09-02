@@ -40,9 +40,10 @@ The setup script pins the OCR versions and downloads them into `vendor/tesseract
   - `r` selects two points to draw a rectangle border.
   - `t` selects one point for a textbox; `OK` or `Enter` while focused applies the typed text.
   - Text annotations default to `14px` font size.
+  - Applied text annotations can be dragged within the screenshot area.
   - `s` opens or closes annotation settings for seven colors, `1px` to `50px` line width, and text font size. The selected color and font size apply to new text annotations.
   - `` ` `` resets the overlay to its initial full-viewport state.
-  - `p` opens a toolbar with Crop, Arrow, Rectangle, Text, Settings, and Help buttons.
+  - `p` opens a toolbar with Crop, Arrow, Rectangle, Text, Reset, Settings, and Help buttons.
   - `h` opens or closes the shortcuts help popup.
   - `Ctrl + Z` undoes the latest annotation change.
   - `Ctrl + Y` redoes the latest undone annotation change.

@@ -36,6 +36,10 @@
   cursor: crosshair;
 }
 
+#shortcuts-annotate-screenshot-root[data-stage="text-dragging"] {
+  cursor: move;
+}
+
 #shortcuts-annotate-screenshot-root .shortcuts-annotate__area {
   position: fixed;
   display: none;
@@ -56,6 +60,11 @@
   height: 100vh;
   overflow: visible;
   pointer-events: none;
+}
+
+#shortcuts-annotate-screenshot-root .shortcuts-annotate__drawing text[data-annotation-index] {
+  cursor: move;
+  pointer-events: visiblePainted;
 }
 
 #shortcuts-annotate-screenshot-root .shortcuts-annotate__drawing [data-draft="true"] {

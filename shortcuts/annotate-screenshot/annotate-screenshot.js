@@ -38,6 +38,7 @@
     undoStack: [],
     redoStack: [],
     textPoint: null,
+    textDrag: null,
     latestDataUrl: '',
     latestFilename: '',
     captureRestoreTimer: null,
@@ -69,6 +70,8 @@
 
   root.addEventListener('pointerdown', handlePointerDown, true);
   root.addEventListener('pointermove', handlePointerMove, true);
+  window.addEventListener('pointerup', handlePointerUp, true);
+  window.addEventListener('pointercancel', handlePointerCancel, true);
   root.addEventListener('contextmenu', preventDefault, true);
   settings.okButton.addEventListener('click', applySettings);
   settings.panel.addEventListener('pointerdown', stopPropagation, true);
@@ -78,6 +81,7 @@
   toolbar.arrowButton.addEventListener('click', handleToolbarArrow);
   toolbar.rectangleButton.addEventListener('click', handleToolbarRectangle);
   toolbar.textButton.addEventListener('click', handleToolbarText);
+  toolbar.resetButton.addEventListener('click', handleToolbarReset);
   toolbar.settingsButton.addEventListener('click', handleToolbarSettings);
   toolbar.helpButton.addEventListener('click', handleToolbarHelp);
   toolbar.panel.addEventListener('pointerdown', stopPropagation, true);
@@ -102,6 +106,13 @@
 
   function handlePointerDown(event) {
     if (state.destroyed || event.button !== 0 || isPanelTarget(event.target)) return;
+
+    const textIndex = getTextAnnotationIndex(event.target);
+    if (state.stage === 'idle' && textIndex !== null) {
+      startTextDrag(event, textIndex);
+      return;
+    }
+
     if (!isSelectingStage(state.stage) && state.stage !== 'text-selecting') return;
 
     event.preventDefault();
@@ -128,12 +139,29 @@
   }
 
   function handlePointerMove(event) {
+    if (state.destroyed) return;
+
+    if (state.textDrag) {
+      updateTextDrag(event);
+      return;
+    }
+
     if (state.destroyed || !isSelectingStage(state.stage) || !state.firstPoint) return;
     state.pointerPoint = getClampedPointForCurrentStage({
       x: event.clientX,
       y: event.clientY
     });
     render();
+  }
+
+  function handlePointerUp(event) {
+    if (state.destroyed || !state.textDrag) return;
+    finishTextDrag(event);
+  }
+
+  function handlePointerCancel(event) {
+    if (state.destroyed || !state.textDrag) return;
+    cancelTextDrag(event);
   }
 
   function finishSelection(start, end) {
@@ -173,6 +201,109 @@
     render();
   }
 
+  function startTextDrag(event, annotationIndex) {
+    const annotation = state.annotations[annotationIndex];
+    if (!annotation || annotation.type !== 'text') return;
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+
+    state.textDrag = {
+      pointerId: event.pointerId,
+      annotationIndex,
+      startPointer: { x: event.clientX, y: event.clientY },
+      originalPoint: clonePlainObject(annotation.point),
+      historySnapshot: createHistorySnapshot(),
+      moved: false
+    };
+    state.stage = 'text-dragging';
+    root.dataset.stage = state.stage;
+    root.focus({ preventScroll: true });
+
+    try {
+      root.setPointerCapture?.(event.pointerId);
+    } catch (_) {
+      // Pointer capture can fail if the browser has already canceled the pointer.
+    }
+  }
+
+  function updateTextDrag(event) {
+    if (!state.textDrag || event.pointerId !== state.textDrag.pointerId) return;
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+
+    const annotation = state.annotations[state.textDrag.annotationIndex];
+    if (!annotation || annotation.type !== 'text') {
+      cancelTextDrag(event);
+      return;
+    }
+
+    const nextPoint = clampPoint({
+      x: state.textDrag.originalPoint.x + event.clientX - state.textDrag.startPointer.x,
+      y: state.textDrag.originalPoint.y + event.clientY - state.textDrag.startPointer.y
+    }, state.area);
+
+    if (distance(annotation.point, nextPoint) < 1) return;
+
+    annotation.point = nextPoint;
+    state.textDrag.moved = true;
+    state.latestDataUrl = '';
+    state.latestFilename = '';
+    render();
+  }
+
+  function finishTextDrag(event) {
+    const drag = state.textDrag;
+    if (!drag || event.pointerId !== drag.pointerId) return;
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+
+    const annotation = state.annotations[drag.annotationIndex];
+    if (drag.moved && annotation?.type === 'text' && !snapshotsEqual(drag.historySnapshot, createHistorySnapshot())) {
+      recordHistorySnapshot(drag.historySnapshot);
+    }
+
+    clearTextDrag(event);
+    render();
+    root.focus({ preventScroll: true });
+  }
+
+  function cancelTextDrag(event) {
+    const drag = state.textDrag;
+    if (!drag || (event && event.pointerId !== drag.pointerId)) return;
+
+    const annotation = state.annotations[drag.annotationIndex];
+    if (annotation?.type === 'text') {
+      annotation.point = clonePlainObject(drag.originalPoint);
+    }
+
+    clearTextDrag(event);
+    render();
+  }
+
+  function clearTextDrag(event) {
+    const pointerId = state.textDrag?.pointerId;
+    state.textDrag = null;
+    state.stage = 'idle';
+    root.dataset.stage = state.stage;
+
+    if (typeof pointerId === 'number') {
+      try {
+        root.releasePointerCapture?.(pointerId);
+      } catch (_) {
+        // Pointer capture may already be released by the browser.
+      }
+    } else if (event?.pointerId !== undefined) {
+      try {
+        root.releasePointerCapture?.(event.pointerId);
+      } catch (_) {
+        // Pointer capture may already be released by the browser.
+      }
+    }
+  }
+
   function handleKeyDown(event) {
     if (state.destroyed) return;
 
@@ -201,6 +332,10 @@
       }
 
       return;
+    }
+
+    if (state.textDrag) {
+      cancelTextDrag();
     }
 
     if (event.ctrlKey && key === 'z' && !event.shiftKey && !event.altKey && !event.metaKey) {
@@ -309,6 +444,7 @@
   }
 
   function startSelection(stage) {
+    cancelTextDrag();
     closeToolbar();
     closeSettings();
     closeHelp();
@@ -345,6 +481,7 @@
     state.firstPoint = null;
     state.pointerPoint = null;
     state.textPoint = null;
+    state.textDrag = null;
     state.style = { ...DEFAULT_STYLE };
     state.latestDataUrl = '';
     state.latestFilename = '';
@@ -381,6 +518,13 @@
     const lastSnapshot = state.undoStack[state.undoStack.length - 1];
     if (lastSnapshot && snapshotsEqual(lastSnapshot, snapshot)) return;
 
+    recordHistorySnapshot(snapshot);
+  }
+
+  function recordHistorySnapshot(snapshot) {
+    const lastSnapshot = state.undoStack[state.undoStack.length - 1];
+    if (lastSnapshot && snapshotsEqual(lastSnapshot, snapshot)) return;
+
     pushHistorySnapshot(state.undoStack, snapshot);
     state.redoStack = [];
   }
@@ -396,6 +540,7 @@
     closeToolbar();
     closeSettings();
     closeHelp();
+    cancelTextDrag();
     closeTextEditor();
     clearCaptureRestoreTimer();
 
@@ -406,6 +551,7 @@
     state.firstPoint = null;
     state.pointerPoint = null;
     state.textPoint = null;
+    state.textDrag = null;
     state.latestDataUrl = '';
     state.latestFilename = '';
     root.dataset.stage = state.stage;
@@ -419,11 +565,13 @@
     closeToolbar();
     closeSettings();
     closeHelp();
+    cancelTextDrag();
     closeTextEditor();
     state.stage = 'idle';
     state.firstPoint = null;
     state.pointerPoint = null;
     state.textPoint = null;
+    state.textDrag = null;
     root.dataset.stage = state.stage;
     render();
     root.focus({ preventScroll: true });
@@ -636,6 +784,11 @@
     handleTextShortcut();
   }
 
+  function handleToolbarReset() {
+    closeToolbar();
+    resetAll();
+  }
+
   function handleToolbarSettings() {
     closeToolbar();
     handleSettingsShortcut();
@@ -816,8 +969,8 @@
     svg.replaceChildren();
     svg.setAttribute('viewBox', `0 0 ${window.innerWidth} ${window.innerHeight}`);
 
-    state.annotations.forEach((annotation) => {
-      appendAnnotation(annotation, false);
+    state.annotations.forEach((annotation, index) => {
+      appendAnnotation(annotation, false, index);
     });
 
     if (isSelectingStage(state.stage) && state.firstPoint && state.pointerPoint) {
@@ -835,9 +988,9 @@
     }
   }
 
-  function appendAnnotation(annotation, draft) {
+  function appendAnnotation(annotation, draft, annotationIndex = null) {
     if (annotation.type === 'text') {
-      appendText(annotation, draft);
+      appendText(annotation, draft, annotationIndex);
       return;
     }
 
@@ -849,12 +1002,15 @@
     appendSelectionRectangle(normalizeRectangle(annotation.start, annotation.end), draft, annotation.color, annotation.lineWidth);
   }
 
-  function appendText(annotation, draft) {
+  function appendText(annotation, draft, annotationIndex) {
     const lines = splitTextLines(annotation.text);
     if (!lines.length) return;
 
     const textNode = document.createElementNS('http://www.w3.org/2000/svg', 'text');
     textNode.dataset.draft = String(Boolean(draft));
+    if (!draft && annotationIndex !== null) {
+      textNode.dataset.annotationIndex = String(annotationIndex);
+    }
     textNode.setAttribute('x', annotation.point.x);
     textNode.setAttribute('y', getTextFirstLineY(annotation, lines.length));
     textNode.setAttribute('fill', annotation.color);
@@ -1130,10 +1286,11 @@
     const arrowButton = createButton('Arrow', 'Draw arrow');
     const rectangleButton = createButton('Rectangle', 'Draw rectangle border');
     const textButton = createButton('Text', 'Add text annotation');
+    const resetButton = createButton('Reset', 'Reset annotation overlay');
     const settingsButton = createButton('Settings', 'Open annotation settings');
     const helpButton = createButton('Help', 'Open annotation shortcuts help');
 
-    panelNode.append(cropButton, arrowButton, rectangleButton, textButton, settingsButton, helpButton);
+    panelNode.append(cropButton, arrowButton, rectangleButton, textButton, resetButton, settingsButton, helpButton);
 
     return {
       panel: panelNode,
@@ -1141,6 +1298,7 @@
       arrowButton,
       rectangleButton,
       textButton,
+      resetButton,
       settingsButton,
       helpButton
     };
@@ -1184,6 +1342,19 @@
       toolbar.panel.contains(target) ||
       settings.panel.contains(target) ||
       help.panel.contains(target);
+  }
+
+  function getTextAnnotationIndex(target) {
+    if (!(target instanceof Element)) return null;
+
+    const textNode = target.closest('text[data-annotation-index]');
+    if (!textNode || !svg.contains(textNode)) return null;
+
+    const annotationIndex = Number(textNode.dataset.annotationIndex);
+    if (!Number.isInteger(annotationIndex)) return null;
+
+    const annotation = state.annotations[annotationIndex];
+    return annotation?.type === 'text' ? annotationIndex : null;
   }
 
   function isSelectingStage(stage) {
@@ -1365,6 +1536,8 @@
 
     root.removeEventListener('pointerdown', handlePointerDown, true);
     root.removeEventListener('pointermove', handlePointerMove, true);
+    window.removeEventListener('pointerup', handlePointerUp, true);
+    window.removeEventListener('pointercancel', handlePointerCancel, true);
     root.removeEventListener('contextmenu', preventDefault, true);
     settings.okButton.removeEventListener('click', applySettings);
     settings.panel.removeEventListener('pointerdown', stopPropagation, true);
@@ -1374,6 +1547,7 @@
     toolbar.arrowButton.removeEventListener('click', handleToolbarArrow);
     toolbar.rectangleButton.removeEventListener('click', handleToolbarRectangle);
     toolbar.textButton.removeEventListener('click', handleToolbarText);
+    toolbar.resetButton.removeEventListener('click', handleToolbarReset);
     toolbar.settingsButton.removeEventListener('click', handleToolbarSettings);
     toolbar.helpButton.removeEventListener('click', handleToolbarHelp);
     toolbar.panel.removeEventListener('pointerdown', stopPropagation, true);
