@@ -21,6 +21,7 @@ const VIEW_CONFIG = Object.freeze({
 });
 
 const pageScreenshotBtn = document.getElementById('pageScreenshotBtn');
+const annotateScreenshotBtn = document.getElementById('annotateScreenshotBtn');
 const copyUrlsViewBtn = document.getElementById('copyUrlsViewBtn');
 const downloadFilesViewBtn = document.getElementById('downloadFilesViewBtn');
 const scanRegionTextBtn = document.getElementById('scanRegionTextBtn');
@@ -61,10 +62,12 @@ let isSavingScreenshot = false;
 let isCopyingUrls = false;
 let isPreparingFiles = false;
 let isWritingFiles = false;
+let isStartingAnnotation = false;
 let isStartingRegionScan = false;
 let messageBarResizeObserver = null;
 
 pageScreenshotBtn.addEventListener('click', handlePageScreenshot);
+annotateScreenshotBtn.addEventListener('click', handleAnnotateScreenshot);
 copyUrlsViewBtn.addEventListener('click', () => openView('copy-urls'));
 downloadFilesViewBtn.addEventListener('click', () => openView('download-files'));
 scanRegionTextBtn.addEventListener('click', handleScanRegionToText);
@@ -132,8 +135,9 @@ function handleGlobalShortcut(event) {
 
   const shortcutActions = {
     '1': handlePageScreenshot,
-    '2': () => openView('copy-urls'),
-    '3': () => openView('download-files'),
+    '2': handleAnnotateScreenshot,
+    '3': () => openView('copy-urls'),
+    '4': () => openView('download-files'),
     '9': handleScanRegionToText,
     s: handleSaveScreenshot,
     q: closePopup
@@ -176,6 +180,45 @@ function openView(viewName) {
 function openHomeView() {
   openView('home');
   setMessage('Ready.', 'info');
+}
+
+async function handleAnnotateScreenshot() {
+  if (isStartingAnnotation) return;
+
+  setStartingAnnotation(true);
+  setMessage('Starting Annotate Screenshot...', 'info');
+
+  try {
+    const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+
+    if (!Number.isInteger(activeTab?.id)) {
+      throw new Error('No active browser tab is available.');
+    }
+
+    if (!isScriptableTabUrl(activeTab.url)) {
+      throw new Error('Chrome cannot run Annotate Screenshot on this page. Open a normal HTTP/HTTPS website and try again.');
+    }
+
+    await chrome.scripting.insertCSS({
+      target: { tabId: activeTab.id },
+      files: ['annotate-screenshot/annotate-screenshot.css']
+    });
+
+    const results = await chrome.scripting.executeScript({
+      target: { tabId: activeTab.id },
+      files: ['annotate-screenshot/annotate-screenshot.js']
+    });
+
+    const status = results?.[0]?.result?.status;
+    setMessage(status === 'already-active' ? 'Annotate Screenshot is already active on this tab.' : 'Annotate Screenshot started.', 'success');
+
+    window.setTimeout(closePopup, 80);
+  } catch (error) {
+    console.error('[Shortcuts Extension: Annotate Screenshot]', error);
+    setMessage(getFriendlyError(error), 'error');
+  } finally {
+    setStartingAnnotation(false);
+  }
 }
 
 async function handleScanRegionToText() {
@@ -935,6 +978,12 @@ function setSaveScreenshotButtonEnabled(isEnabled) {
   saveScreenshotBtn.setAttribute('aria-disabled', String(!isEnabled));
 }
 
+function setStartingAnnotation(nextState) {
+  isStartingAnnotation = nextState;
+  annotateScreenshotBtn.disabled = nextState;
+  annotateScreenshotBtn.setAttribute('aria-disabled', String(nextState));
+}
+
 function setCopyingUrls(nextState) {
   isCopyingUrls = nextState;
   copyUrlsSubmitBtn.disabled = nextState;
@@ -966,7 +1015,8 @@ function getFriendlyError(error) {
     message.includes('Cannot access') ||
     message.includes('cannot be scripted') ||
     message.includes('extensions gallery') ||
-    message.includes('Chrome cannot run Scan Region To Text')
+    message.includes('Chrome cannot run Scan Region To Text') ||
+    message.includes('Chrome cannot run Annotate Screenshot')
   ) {
     return 'Chrome cannot access this page. Try a normal HTTP/HTTPS website.';
   }

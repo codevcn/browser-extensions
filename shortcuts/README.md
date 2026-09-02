@@ -1,6 +1,6 @@
-# Shortcuts Extension v3.0.4
+# Shortcuts Extension v4.0.0
 
-A keyboard-first Chrome Manifest V3 extension for viewport screenshots, tab URL utilities, file downloads, and local OCR region scanning.
+A keyboard-first Chrome Manifest V3 extension for viewport screenshots, screenshot annotation, tab URL utilities, file downloads, and local OCR region scanning.
 
 ## One-time OCR setup
 
@@ -31,12 +31,31 @@ The setup script pins the OCR versions and downloads them into `vendor/tesseract
 - `1` — **Page Screenshot**
   - Captures the visible viewport of the active tab.
   - Copies the PNG image to the clipboard.
-- `2` — **Copy URLs by Domain**
+- `2` — **Annotate Screenshot**
+  - Opens a transparent full-viewport annotation layer on the active website.
+  - Covers the page with `rgba(0,0,0,0.3)`.
+  - Uses the full visible viewport as the default screenshot area.
+  - `x` selects two points to crop the screenshot area.
+  - `a` selects two points to draw an arrow.
+  - `r` selects two points to draw a rectangle border.
+  - `t` selects one point for a textbox; `OK` or `Enter` while focused applies the typed text.
+  - Text annotations default to `14px` font size.
+  - `s` opens or closes annotation settings for seven colors, `1px` to `50px` line width, and text font size. The selected color and font size apply to new text annotations.
+  - `` ` `` resets the overlay to its initial full-viewport state.
+  - `p` opens a toolbar with Crop, Arrow, Rectangle, Text, Settings, and Help buttons.
+  - `h` opens or closes the shortcuts help popup.
+  - `Ctrl + Z` undoes the latest annotation change.
+  - `Ctrl + Y` redoes the latest undone annotation change.
+  - `c` captures the screenshot area and copies the PNG to the clipboard.
+  - `o` captures the screenshot area and opens the Chrome save dialog for the PNG.
+  - `q` or `Esc` exits the annotation layer without reopening the extension popup.
+  - `Enter` captures the screenshot area, copies the PNG to the clipboard, then exits the annotation layer.
+- `3` — **Copy URLs by Domain**
   - Opens a form for a domain such as `example.com`.
   - Searches every open HTTP/HTTPS tab.
   - Matches the domain and its subdomains.
   - Optional checkbox removes query strings while preserving URL fragments.
-- `3` — **Download Files by Domain**
+- `4` — **Download Files by Domain**
   - Opens a form for a domain.
   - Copies matching full tab URLs to the clipboard.
   - Fetches matching URLs with a concurrency limit of four requests.
@@ -58,7 +77,7 @@ The setup script pins the OCR versions and downloads them into `vendor/tesseract
   - `Reset` clears the rectangle/result immediately so a new region can be selected from scratch.
   - Displays recognized text in a selectable result panel with a Copy icon button.
   - Copy button or `Ctrl + C` copies the entire recognized result; successful copy switches to a Check icon for 2 seconds.
-  - `OK`, `Esc`, or `Ctrl + Q` closes the scanner.
+  - `OK`, `Q`, `Esc`, or `Ctrl + Q` closes the scanner.
 - `S` — **Save Screenshot**
   - Opens Save As for the latest screenshot captured in the current popup session.
 - `Q` — **Close**
@@ -107,7 +126,7 @@ Popup (9)
 
 ## Versioning
 
-- Extension release: **3.0.4**
+- Extension release: **4.0.0**
 - Chrome manifest format: **Manifest V3**
 - OCR engine: **Tesseract.js 7.0.0**
 
@@ -119,9 +138,9 @@ The popup reads its displayed extension version directly from `manifest.json` us
 - `clipboardWrite` — write images and text to the clipboard.
 - `downloads` — save the latest screenshot through Chrome Downloads.
 - `offscreen` — run local OCR in a hidden extension document with DOM/Worker support.
-- `scripting` — inject the region selector only when feature `9` is invoked.
+- `scripting` — inject the screenshot annotator for feature `2` and the region selector for feature `9`.
 - `tabs` — read tab URLs/titles and route OCR progress to the source tab.
-- `host_permissions` for `http://*/*` and `https://*/*` — existing features 2 and 3 need access to matching open-tab URLs and remote file responses.
+- `host_permissions` for `http://*/*` and `https://*/*` — features 3 and 4 need access to matching open-tab URLs and remote file responses.
 
 Minimum Chrome version is 109 because `chrome.offscreen` is used for OCR.
 
@@ -150,8 +169,8 @@ Responses with `text/html` or `application/xhtml+xml` are treated as normal web 
 - Page Screenshot and Region OCR capture only the visible viewport, not the entire scrollable page.
 - OCR accuracy depends on the visible pixels. Very tiny, blurred, rotated, stylized, or low-contrast text can be less accurate.
 - This build bundles English and Vietnamese OCR data (`eng + vie`) after running the setup script.
-- Feature `Ctrl + Q` is handled at page level while the scanner is active; browser/OS-reserved shortcuts can still take precedence on some systems. `Esc` is the reliable exit shortcut.
-- Prepared download-file data for feature 3 remains in popup memory until the popup closes or a new scan starts.
+- Feature `Q` and `Ctrl + Q` are handled at page level while the scanner is active; browser/OS-reserved shortcuts can still take precedence on some systems. `Esc` is the reliable exit shortcut.
+- Prepared download-file data for feature 4 remains in popup memory until the popup closes or a new scan starts.
 
 ## Project files added in v3.0.4
 

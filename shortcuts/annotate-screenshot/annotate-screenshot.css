@@ -1,0 +1,340 @@
+:root {
+  --shortcuts-annotate-overlay: rgba(0, 0, 0, 0.3);
+  --shortcuts-annotate-surface: rgba(255, 255, 255, 0.98);
+  --shortcuts-annotate-text: #1f2937;
+  --shortcuts-annotate-subtle: #4b5563;
+  --shortcuts-annotate-border: rgba(17, 24, 39, 0.16);
+  --shortcuts-annotate-shadow: 0 10px 30px rgba(17, 24, 39, 0.2);
+}
+
+#shortcuts-annotate-screenshot-root,
+#shortcuts-annotate-screenshot-root * {
+  box-sizing: border-box;
+}
+
+#shortcuts-annotate-screenshot-root {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: var(--shortcuts-annotate-overlay);
+  color: var(--shortcuts-annotate-text);
+  cursor: default;
+  font-family: Arial, sans-serif;
+  user-select: none;
+  touch-action: none;
+}
+
+#shortcuts-annotate-screenshot-root[data-stage="crop-selecting"],
+#shortcuts-annotate-screenshot-root[data-stage="arrow-selecting"],
+#shortcuts-annotate-screenshot-root[data-stage="rect-selecting"],
+#shortcuts-annotate-screenshot-root[data-stage="text-selecting"] {
+  cursor: crosshair;
+}
+
+#shortcuts-annotate-screenshot-root .shortcuts-annotate__area {
+  position: fixed;
+  display: none;
+  border: 2px dashed rgba(255, 255, 255, 0.95);
+  outline: 1px solid rgba(17, 24, 39, 0.4);
+  background: rgba(255, 255, 255, 0.08);
+  pointer-events: none;
+}
+
+#shortcuts-annotate-screenshot-root .shortcuts-annotate__area[data-visible="true"] {
+  display: block;
+}
+
+#shortcuts-annotate-screenshot-root .shortcuts-annotate__drawing {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: visible;
+  pointer-events: none;
+}
+
+#shortcuts-annotate-screenshot-root .shortcuts-annotate__drawing [data-draft="true"] {
+  opacity: 0.75;
+  stroke-dasharray: 7 5;
+}
+
+#shortcuts-annotate-screenshot-root .shortcuts-annotate__settings,
+#shortcuts-annotate-screenshot-root .shortcuts-annotate__toolbar,
+#shortcuts-annotate-screenshot-root .shortcuts-annotate__help {
+  position: fixed;
+  z-index: 2;
+  border: 1px solid var(--shortcuts-annotate-border);
+  border-radius: 8px;
+  background: var(--shortcuts-annotate-surface);
+  box-shadow: var(--shortcuts-annotate-shadow);
+  pointer-events: auto;
+}
+
+#shortcuts-annotate-screenshot-root .shortcuts-annotate__toolbar {
+  top: 16px;
+  left: 50%;
+  display: none;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  transform: translateX(-50%);
+  font-size: 14px;
+}
+
+#shortcuts-annotate-screenshot-root .shortcuts-annotate__toolbar[data-visible="true"] {
+  display: flex;
+}
+
+#shortcuts-annotate-screenshot-root .shortcuts-annotate__button {
+  min-width: 58px;
+  height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--shortcuts-annotate-border);
+  border-radius: 6px;
+  background: #ffffff;
+  color: var(--shortcuts-annotate-text);
+  font: 700 14px/1 Arial, sans-serif;
+  cursor: pointer;
+}
+
+#shortcuts-annotate-screenshot-root .shortcuts-annotate__button:hover:not(:disabled) {
+  background: #f3f4f6;
+}
+
+#shortcuts-annotate-screenshot-root .shortcuts-annotate__button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+#shortcuts-annotate-screenshot-root .shortcuts-annotate__button:focus-visible,
+#shortcuts-annotate-screenshot-root input:focus-visible {
+  outline: 3px solid rgba(59, 130, 246, 0.9);
+  outline-offset: 2px;
+}
+
+#shortcuts-annotate-screenshot-root .shortcuts-annotate__settings {
+  top: 76px;
+  right: 16px;
+  display: none;
+  width: min(320px, calc(100vw - 32px));
+  padding: 14px;
+  font-size: 14px;
+}
+
+#shortcuts-annotate-screenshot-root .shortcuts-annotate__settings[data-visible="true"] {
+  display: grid;
+  gap: 13px;
+}
+
+#shortcuts-annotate-screenshot-root .shortcuts-annotate__settings strong {
+  color: var(--shortcuts-annotate-text);
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+#shortcuts-annotate-screenshot-root .shortcuts-annotate__colors {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+#shortcuts-annotate-screenshot-root .shortcuts-annotate__color {
+  display: block;
+  cursor: pointer;
+}
+
+#shortcuts-annotate-screenshot-root .shortcuts-annotate__color input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+#shortcuts-annotate-screenshot-root .shortcuts-annotate__color span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  aspect-ratio: 1;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.36);
+}
+
+#shortcuts-annotate-screenshot-root .shortcuts-annotate__color input:checked + span {
+  border-color: #111827;
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #111827;
+}
+
+#shortcuts-annotate-screenshot-root .shortcuts-annotate__thickness,
+#shortcuts-annotate-screenshot-root .shortcuts-annotate__font-size {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) 64px;
+  align-items: center;
+  gap: 10px;
+  color: var(--shortcuts-annotate-subtle);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+#shortcuts-annotate-screenshot-root .shortcuts-annotate__thickness input[type="range"],
+#shortcuts-annotate-screenshot-root .shortcuts-annotate__font-size input[type="range"] {
+  width: 100%;
+  accent-color: #111827;
+}
+
+#shortcuts-annotate-screenshot-root .shortcuts-annotate__thickness input[type="number"],
+#shortcuts-annotate-screenshot-root .shortcuts-annotate__font-size input[type="number"] {
+  width: 64px;
+  height: 32px;
+  padding: 5px 7px;
+  border: 1px solid var(--shortcuts-annotate-border);
+  border-radius: 5px;
+  color: var(--shortcuts-annotate-text);
+  background: #ffffff;
+  font: 700 14px/1 Arial, sans-serif;
+}
+
+#shortcuts-annotate-screenshot-root .shortcuts-annotate__ok {
+  width: 100%;
+  background: #111827;
+  color: #ffffff;
+}
+
+#shortcuts-annotate-screenshot-root .shortcuts-annotate__ok:hover:not(:disabled) {
+  background: #c0c0c0;
+  color: #000000;
+}
+
+#shortcuts-annotate-screenshot-root .shortcuts-annotate__help {
+  top: 76px;
+  left: 16px;
+  display: none;
+  width: min(380px, calc(100vw - 32px));
+  padding: 14px;
+  font-size: 14px;
+}
+
+#shortcuts-annotate-screenshot-root .shortcuts-annotate__help[data-visible="true"] {
+  display: grid;
+  gap: 12px;
+}
+
+#shortcuts-annotate-screenshot-root .shortcuts-annotate__help strong {
+  color: var(--shortcuts-annotate-text);
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+#shortcuts-annotate-screenshot-root .shortcuts-annotate__shortcut-list {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 8px 10px;
+  margin: 0;
+  color: var(--shortcuts-annotate-text);
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+#shortcuts-annotate-screenshot-root .shortcuts-annotate__shortcut-list dt,
+#shortcuts-annotate-screenshot-root .shortcuts-annotate__shortcut-list dd {
+  margin: 0;
+}
+
+#shortcuts-annotate-screenshot-root .shortcuts-annotate__shortcut-list kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  height: 24px;
+  padding: 0 8px;
+  border: 1px solid var(--shortcuts-annotate-border);
+  border-radius: 5px;
+  background: #f9fafb;
+  color: #111827;
+  font: 700 14px/1 Arial, sans-serif;
+}
+
+#shortcuts-annotate-screenshot-root .shortcuts-annotate__shortcut-list dd {
+  color: var(--shortcuts-annotate-subtle);
+}
+
+#shortcuts-annotate-screenshot-root .shortcuts-annotate__help-close {
+  width: 100%;
+}
+
+#shortcuts-annotate-screenshot-root .shortcuts-annotate__text-editor {
+  position: fixed;
+  z-index: 2;
+  display: none;
+  align-items: flex-end;
+  gap: 8px;
+  pointer-events: auto;
+}
+
+#shortcuts-annotate-screenshot-root .shortcuts-annotate__text-editor[data-visible="true"] {
+  display: flex;
+}
+
+#shortcuts-annotate-screenshot-root .shortcuts-annotate__text-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 74px;
+  padding: 8px 10px;
+  border: 1px solid var(--shortcuts-annotate-border);
+  border-radius: 6px;
+  background: #ffffff;
+  box-shadow: var(--shortcuts-annotate-shadow);
+  color: var(--shortcuts-annotate-text);
+  font: 700 14px/1.25 Arial, sans-serif;
+  resize: none;
+}
+
+#shortcuts-annotate-screenshot-root .shortcuts-annotate__text-input::placeholder {
+  color: #9ca3af;
+}
+
+#shortcuts-annotate-screenshot-root .shortcuts-annotate__text-ok {
+  flex: 0 0 auto;
+  height: 38px;
+}
+
+@media (max-width: 620px) {
+  #shortcuts-annotate-screenshot-root .shortcuts-annotate__button {
+    min-width: 0;
+    padding: 0 8px;
+  }
+
+  #shortcuts-annotate-screenshot-root .shortcuts-annotate__toolbar {
+    right: 16px;
+    left: 16px;
+    display: none;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    transform: none;
+  }
+
+  #shortcuts-annotate-screenshot-root .shortcuts-annotate__toolbar[data-visible="true"] {
+    display: grid;
+  }
+
+  #shortcuts-annotate-screenshot-root .shortcuts-annotate__settings,
+  #shortcuts-annotate-screenshot-root .shortcuts-annotate__help {
+    top: 126px;
+    right: 16px;
+    left: 16px;
+    width: auto;
+  }
+
+  #shortcuts-annotate-screenshot-root .shortcuts-annotate__text-editor {
+    gap: 6px;
+  }
+
+}

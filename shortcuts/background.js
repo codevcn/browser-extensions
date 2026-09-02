@@ -1,6 +1,7 @@
 const OFFSCREEN_DOCUMENT_PATH = 'offscreen.html';
 const REGION_SCAN_MESSAGE = 'shortcuts:region-scan';
 const OCR_MESSAGE = 'shortcuts:ocr';
+const ANNOTATE_MESSAGE = 'shortcuts:annotate-screenshot';
 
 const activeOcrRequests = new Map();
 let creatingOffscreenDocument = null;
@@ -22,6 +23,45 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return undefined;
   }
 
+  if (message.target === 'background' && message.type === `${ANNOTATE_MESSAGE}:capture`) {
+    handleAnnotatedScreenshotCapture(message, sender)
+      .then(sendResponse)
+      .catch((error) => {
+        console.error('[Shortcuts Extension: Annotate Screenshot]', error);
+        sendResponse({
+          ok: false,
+          error: getErrorMessage(error)
+        });
+      });
+    return true;
+  }
+
+  if (message.target === 'background' && message.type === `${ANNOTATE_MESSAGE}:copy-image`) {
+    copyImageToClipboard(message)
+      .then(sendResponse)
+      .catch((error) => {
+        console.error('[Shortcuts Extension: Annotated Screenshot Clipboard]', error);
+        sendResponse({
+          ok: false,
+          error: getErrorMessage(error)
+        });
+      });
+    return true;
+  }
+
+  if (message.target === 'background' && message.type === `${ANNOTATE_MESSAGE}:save`) {
+    saveAnnotatedScreenshot(message)
+      .then(sendResponse)
+      .catch((error) => {
+        console.error('[Shortcuts Extension: Annotated Screenshot Save]', error);
+        sendResponse({
+          ok: false,
+          error: getErrorMessage(error)
+        });
+      });
+    return true;
+  }
+
   if (message.target === 'background' && message.type === `${REGION_SCAN_MESSAGE}:recognize`) {
     handleRegionRecognition(message, sender)
       .then(sendResponse)
@@ -37,6 +77,82 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
   return undefined;
 });
+
+async function handleAnnotatedScreenshotCapture(message, sender) {
+  const tabId = sender.tab?.id;
+  const windowId = sender.tab?.windowId;
+
+  if (!Number.isInteger(tabId) || !Number.isInteger(windowId)) {
+    throw new Error('Annotated screenshot capture must be started from a browser tab.');
+  }
+
+  const requestId = normalizeRequestId(message.requestId);
+  const area = normalizeRect(message.area);
+  const viewport = normalizeViewport(message.viewport);
+  const annotations = normalizeAnnotations(message.annotations);
+
+  const [activeTab] = await chrome.tabs.query({ active: true, windowId });
+  if (activeTab?.id !== tabId) {
+    throw new Error('The source tab is no longer active. Return to it and run Annotate Screenshot again.');
+  }
+
+  const screenshotDataUrl = await chrome.tabs.captureVisibleTab(windowId, {
+    format: 'png'
+  });
+
+  await ensureOffscreenDocument();
+
+  const response = await chrome.runtime.sendMessage({
+    target: 'offscreen',
+    type: `${ANNOTATE_MESSAGE}:render`,
+    requestId,
+    screenshotDataUrl,
+    area,
+    viewport,
+    annotations
+  });
+
+  if (!response?.ok) {
+    throw new Error(response?.error || 'Annotated screenshot rendering failed without an error message.');
+  }
+
+  return {
+    ok: true,
+    dataUrl: String(response.dataUrl || ''),
+    filename: createAnnotatedScreenshotFilename()
+  };
+}
+
+async function copyImageToClipboard(message) {
+  const dataUrl = normalizePngDataUrl(message.dataUrl);
+
+  await ensureOffscreenDocument();
+
+  const response = await chrome.runtime.sendMessage({
+    target: 'offscreen',
+    type: `${ANNOTATE_MESSAGE}:copy-image`,
+    dataUrl
+  });
+
+  if (!response?.ok) {
+    throw new Error(response?.error || 'Annotated screenshot clipboard write failed.');
+  }
+
+  return { ok: true };
+}
+
+async function saveAnnotatedScreenshot(message) {
+  const dataUrl = normalizePngDataUrl(message.dataUrl);
+  const filename = sanitizeFilename(message.filename || createAnnotatedScreenshotFilename());
+
+  await chrome.downloads.download({
+    url: dataUrl,
+    filename,
+    saveAs: true
+  });
+
+  return { ok: true, filename };
+}
 
 async function handleRegionRecognition(message, sender) {
   const tabId = sender.tab?.id;
@@ -122,8 +238,8 @@ async function ensureOffscreenDocument() {
   if (!creatingOffscreenDocument) {
     creatingOffscreenDocument = chrome.offscreen.createDocument({
       url: OFFSCREEN_DOCUMENT_PATH,
-      reasons: ['WORKERS'],
-      justification: 'Run the bundled Tesseract Web Worker for local OCR without injecting the OCR engine into websites.'
+      reasons: ['WORKERS', 'CLIPBOARD'],
+      justification: 'Run local OCR and copy rendered annotated screenshots without injecting heavy extension code into websites.'
     });
   }
 
@@ -192,6 +308,140 @@ function normalizeViewport(value) {
   }
 
   return { width, height };
+}
+
+function normalizeAnnotations(value) {
+  const annotations = Array.isArray(value) ? value : [];
+
+  return annotations.map((annotation) => {
+    const type = annotation?.type === 'arrow' ? 'arrow' : annotation?.type === 'rect' ? 'rect' : annotation?.type === 'text' ? 'text' : '';
+    if (!type) throw new Error('Invalid screenshot annotation type.');
+
+    if (type === 'text') {
+      return {
+        type,
+        point: normalizePoint(annotation.point),
+        text: normalizeAnnotationText(annotation.text),
+        color: normalizeColor(annotation.color),
+        fontSize: normalizeFontSize(annotation.fontSize),
+        lineHeight: normalizeLineHeight(annotation.lineHeight),
+        fontWeight: normalizeFontWeight(annotation.fontWeight),
+        fontFamily: normalizeFontFamily(annotation.fontFamily)
+      };
+    }
+
+    return {
+      type,
+      start: normalizePoint(annotation.start),
+      end: normalizePoint(annotation.end),
+      color: normalizeColor(annotation.color),
+      lineWidth: normalizeLineWidth(annotation.lineWidth)
+    };
+  });
+}
+
+function normalizePoint(value) {
+  const x = Number(value?.x);
+  const y = Number(value?.y);
+
+  if (![x, y].every(Number.isFinite)) {
+    throw new Error('Invalid screenshot annotation point.');
+  }
+
+  return { x, y };
+}
+
+function normalizeColor(value) {
+  const color = String(value || '').trim();
+  if (!/^#[0-9a-f]{6}$/i.test(color)) {
+    throw new Error('Invalid screenshot annotation color.');
+  }
+
+  return color;
+}
+
+function normalizeLineWidth(value) {
+  const lineWidth = Number(value);
+  if (!Number.isFinite(lineWidth)) {
+    throw new Error('Invalid screenshot annotation line width.');
+  }
+
+  return Math.min(50, Math.max(1, lineWidth));
+}
+
+function normalizeAnnotationText(value) {
+  const text = String(value || '')
+    .replace(/\r\n?/g, '\n')
+    .trim();
+
+  if (!text) {
+    throw new Error('Invalid screenshot annotation text.');
+  }
+
+  return text.slice(0, 2000);
+}
+
+function normalizeFontSize(value) {
+  const fontSize = Number(value);
+  if (!Number.isFinite(fontSize)) {
+    throw new Error('Invalid screenshot annotation font size.');
+  }
+
+  return Math.min(96, Math.max(6, fontSize));
+}
+
+function normalizeLineHeight(value) {
+  const lineHeight = Number(value);
+  if (!Number.isFinite(lineHeight)) {
+    throw new Error('Invalid screenshot annotation line height.');
+  }
+
+  return Math.min(3, Math.max(1, lineHeight));
+}
+
+function normalizeFontWeight(value) {
+  const fontWeight = Number(value);
+  if (!Number.isFinite(fontWeight)) return 700;
+
+  return Math.min(900, Math.max(100, Math.round(fontWeight / 100) * 100));
+}
+
+function normalizeFontFamily(value) {
+  const fontFamily = String(value || '').trim();
+  return fontFamily ? fontFamily.slice(0, 120) : 'Arial, sans-serif';
+}
+
+function normalizePngDataUrl(value) {
+  const dataUrl = String(value || '');
+  if (!dataUrl.startsWith('data:image/png;base64,')) {
+    throw new Error('Invalid annotated screenshot PNG.');
+  }
+
+  return dataUrl;
+}
+
+function createAnnotatedScreenshotFilename() {
+  return `annotated-screenshot-${formatTimestamp(new Date())}.png`;
+}
+
+function formatTimestamp(date) {
+  const pad = (value) => String(value).padStart(2, '0');
+
+  return [date.getFullYear(), pad(date.getMonth() + 1), pad(date.getDate())].join('-') +
+    '-' +
+    [pad(date.getHours()), pad(date.getMinutes()), pad(date.getSeconds())].join('-');
+}
+
+function sanitizeFilename(filename) {
+  const sanitized = String(filename || '')
+    .replace(/[<>:"/\\|?*\u0000-\u001F]/g, '_')
+    .replace(/[. ]+$/g, '')
+    .trim();
+
+  const reservedWindowsNames = /^(con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i;
+  const safeName = reservedWindowsNames.test(sanitized) ? `_${sanitized}` : sanitized;
+
+  return safeName.slice(0, 180) || createAnnotatedScreenshotFilename();
 }
 
 function clampProgress(value) {

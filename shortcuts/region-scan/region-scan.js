@@ -170,7 +170,7 @@
     resultPanel.dataset.visible = 'false';
     setStatusVisible(true);
     setControlsVisible(true);
-    setStatus('Preparing screenshot…', 'OCR runs locally in the extension. Reset selects a new region; Esc, Ctrl+Q, or OK exits.');
+    setStatus('Preparing screenshot…', 'OCR runs locally in the extension. Reset selects a new region; Q, Esc, Ctrl+Q, or OK exits.');
 
     try {
       await waitForPaint();
@@ -229,7 +229,7 @@
       normalizedText ? 'OCR complete.' : 'OCR complete, but no text was detected.',
       normalizedText
         ? 'Copy copies the full result. Ctrl+C does the same. Reset selects another region.'
-        : 'Reset selects another region. Press OK, Esc, or Ctrl+Q to exit.'
+        : 'Reset selects another region. Press OK, Q, Esc, or Ctrl+Q to exit.'
     );
   }
 
@@ -248,7 +248,7 @@
     setStatusVisible(true);
     setControlsVisible(true);
     positionResultPanel(state.lockedRect);
-    setStatus('Could not recognize this region.', 'Reset selects another region. Press OK, Esc, or Ctrl+Q to exit.');
+    setStatus('Could not recognize this region.', 'Reset selects another region. Press OK, Q, Esc, or Ctrl+Q to exit.');
   }
 
   function handleRuntimeMessage(message) {
@@ -273,7 +273,9 @@
   function handleKeyDown(event) {
     if (state.destroyed) return;
 
-    const isExitShortcut = event.key === 'Escape' || (event.ctrlKey && !event.altKey && !event.metaKey && event.key.toLowerCase() === 'q');
+    const isExitShortcut = event.key === 'Escape' ||
+      (!event.ctrlKey && !event.altKey && !event.metaKey && event.key.toLowerCase() === 'q') ||
+      (event.ctrlKey && !event.altKey && !event.metaKey && event.key.toLowerCase() === 'q');
     if (isExitShortcut) {
       event.preventDefault();
       event.stopImmediatePropagation();
